@@ -1,7 +1,6 @@
 package br.com.fiap.soat.service.provider;
 
 import br.com.fiap.soat.exception.ApplicationException;
-import br.com.fiap.soat.exception.messages.ApplicationMessage;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -51,7 +50,7 @@ public class CaptureFramesService {
         diretoriosImagens.add(dir.get());
       } catch (InterruptedException e) {
         // erro de thread
-        throw new ApplicationException(ApplicationMessage.ERRO_PROCESSAMENTO);
+        throw new ApplicationException();
       
       } catch (ExecutionException e) {
         // erro recebido do método processarVideo
@@ -67,7 +66,7 @@ public class CaptureFramesService {
       combinedZipFiles = criarArquivoZip(diretoriosImagens, combinedZipDir, nomesVideos);
     
     } catch (IOException e) {
-      throw new ApplicationException(ApplicationMessage.ERRO_PROCESSAMENTO);
+      throw new ApplicationException();
     
     } finally {
       // Apaga os arquivos e diretórios temporários
