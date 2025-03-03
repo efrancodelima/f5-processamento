@@ -5,10 +5,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>br.com.fiap.soat</groupId>
-    <artifactId>soat-fase-5</artifactId>
+    <artifactId>app-processamento</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
-    <name>Frames Capture</name>
+    <name>Microsserviço de processamento</name>
     <description>Captura frames de um vídeo a cada intervalo de tempo</description>
 
     <parent>

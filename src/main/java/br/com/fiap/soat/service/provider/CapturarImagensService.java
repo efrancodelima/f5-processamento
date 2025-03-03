@@ -68,7 +68,7 @@ public class CapturarImagensService {
       String mensagem;
 
       if (e.getMessage().contains("Could not open input")) {
-        mensagem = "O arquivo não é compatível com este serviço.";
+        mensagem = "O tipo de arquivo enviado não é compatível com este serviço.";
       } else {
         mensagem = "Ocorreu um erro ao extrair as imagens do vídeo" 
             + ". Por favor, contate o suporte técnico.";
