@@ -21,10 +21,9 @@ spring:
       location: /tmp
       max-file-size: 300MB
       max-request-size: 300MB
-
-pagamento:
+notificacao:
   service:
-    url: ${URL_SERV_PAGAMENTO}
+    url: ${URL_SERV_NOTIFICACAO}
 
 # Profile para a AWS
 ---

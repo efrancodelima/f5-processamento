@@ -34,7 +34,7 @@ jobs:
         run: nohup mvn spring-boot:run -Dspring-boot.run.profiles=test &
 
       - name: Wait for application
-        run: ./s6-wait-for-app.sh
+        run: ./s2-wait-for-app.sh
         
       - name: Cache SonarQube packages
         uses: actions/cache@v4
@@ -53,7 +53,7 @@ jobs:
       - name: Verify analyze result
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: ./s2-sonar-qube.sh
+        run: ./s3-sonar-qube.sh
 
       - name: Build with Maven
         env:
@@ -88,11 +88,11 @@ jobs:
       - name: Tag and push docker image
         env:
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
-        run: ./s3-ecr-push.sh
+        run: ./s4-ecr-push.sh
 
       - name: Logout from Amazon ECR
         if: always() && env.LOGIN_ECR == 'true'
         run: docker logout ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com
 
       - name: Deploy on Amazon ECS
-        run: ./s4-ecs-deploy.sh
+        run: ./s5-ecs-deploy.sh

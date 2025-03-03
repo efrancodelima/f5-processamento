@@ -1,4 +1,4 @@
-package br.com.fiap.soat.exception;
+package br.com.fiap.soat.exception.handler;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

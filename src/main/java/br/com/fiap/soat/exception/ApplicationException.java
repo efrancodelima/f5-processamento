@@ -1,14 +1,14 @@
 package br.com.fiap.soat.exception;
 
-import br.com.fiap.soat.exception.messages.ApplicationMessage;
-
 public class ApplicationException extends Exception {
 
-  public ApplicationException(ApplicationMessage message) {
-    super(message.getMessage());
+  // Só tem uma mensagem pré-definida para esse tipo de exceção
+  public ApplicationException() {
+    super("Ocorreu um erro inesperado ao processar o vídeo. "
+        + "Por favor, contate o suporte técnico.");
   }
 
-  public ApplicationException(String message) {
-    super(message);
+  public ApplicationException(String mensagem) {
+    super(mensagem);
   }
 }
