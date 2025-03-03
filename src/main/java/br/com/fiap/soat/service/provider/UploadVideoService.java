@@ -1,5 +1,6 @@
 package br.com.fiap.soat.service.provider;
 
+import br.com.fiap.soat.service.util.CapturarImagensService;
 import br.com.fiap.soat.util.RemoverElementosNulos;
 import br.com.fiap.soat.wrapper.FileWrapper;
 import java.util.ArrayList;

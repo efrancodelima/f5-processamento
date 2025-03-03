@@ -1,16 +1,12 @@
-package br.com.fiap.soat.service.provider;
+package br.com.fiap.soat.service.util;
 
 import br.com.fiap.soat.entity.ProcessamentoJpa;
-import br.com.fiap.soat.entity.StatusProcessamento;
-import br.com.fiap.soat.entity.UsuarioJpa;
-import br.com.fiap.soat.repository.ProcessamentoRepository;
 import br.com.fiap.soat.util.ApagarDiretorio;
 import br.com.fiap.soat.util.CompactarArquivos;
 import br.com.fiap.soat.util.ExtrairImagens;
 import br.com.fiap.soat.util.SalvarArquivo;
 import br.com.fiap.soat.wrapper.FileWrapper;
 import java.io.File;
-import java.time.LocalDateTime;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,14 +19,12 @@ public class CapturarImagensService {
   // Atributos
   private static final String TEMP_DIR = "/tmp/";
   private static final int INTERVALO = 15;
-
-  private UsuarioJpa usuario = new UsuarioJpa(1L, "email@email.com");
-  private final ProcessamentoRepository repository;
+  private final ProcessamentoService procService;
 
   // Construtor
   @Autowired
-  public CapturarImagensService(ProcessamentoRepository repository) {
-    this.repository = repository;
+  public CapturarImagensService(ProcessamentoService procService) {
+    this.procService = procService;
   }
 
   // Método público
@@ -41,12 +35,12 @@ public class CapturarImagensService {
     String diretorioBaseStr = TEMP_DIR + uniqueId;
     String diretorioImagensStr = diretorioBaseStr + "/imagens";
     String caminhoArquivoZip = diretorioBaseStr + "/imagens.zip";
-    ProcessamentoJpa processamento = registrarInicioProcessamento(video);
+    ProcessamentoJpa processamento = procService.registrarInicio(video);
     String nomeVideo = video.getName();
     
     if (video.getContent().length == 0) {
       String mensagem = "Não foi possível ler o arquivo " + nomeVideo;
-      registrarErroProcessamento(processamento, mensagem);
+      procService.registrarErro(processamento, mensagem);
       return CompletableFuture.completedFuture(null);
     }
 
@@ -57,7 +51,7 @@ public class CapturarImagensService {
     } catch (Exception e) {
       String mensagem = "Ocorreu um erro ao salvar o arquivo."
           + ". Por favor, contate o suporte técnico.";
-      registrarErroProcessamento(processamento, mensagem);
+      procService.registrarErro(processamento, mensagem);
       return CompletableFuture.completedFuture(null);
     }
 
@@ -73,7 +67,7 @@ public class CapturarImagensService {
         mensagem = "Ocorreu um erro ao extrair as imagens do vídeo" 
             + ". Por favor, contate o suporte técnico.";
       }
-      registrarErroProcessamento(processamento, mensagem);
+      procService.registrarErro(processamento, mensagem);
       return CompletableFuture.completedFuture(null);
     }
     
@@ -86,7 +80,7 @@ public class CapturarImagensService {
     } catch (Exception e) {
       String mensagem = "Ocorreu um erro ao compactar as imagens. "
           + "Por favor, contate o suporte técnico.";
-      registrarErroProcessamento(processamento, mensagem);
+      procService.registrarErro(processamento, mensagem);
       return CompletableFuture.completedFuture(null);
     }
 
@@ -98,34 +92,7 @@ public class CapturarImagensService {
 
 
     // // Encerra
-    registrarSucessoProcessamento(processamento, "https://example.com/");
+    procService.registrarConclusao(processamento, "https://example.com/");
     return CompletableFuture.completedFuture(null);
-  }
-
-  // Métodos privados
-  private ProcessamentoJpa registrarInicioProcessamento(FileWrapper video) {
-
-    var processamento = ProcessamentoJpa.builder()
-        .nomeVideo(video.getName())
-        .usuario(usuario)
-        .statusProcessamento(StatusProcessamento.PENDENTE)
-        .timestampInicio(LocalDateTime.now())
-        .build();
-
-    return repository.save(processamento);
-  }
-
-  private void registrarErroProcessamento(ProcessamentoJpa processamento, String mensagemErro) {
-    processamento.setStatusProcessamento(StatusProcessamento.ERRO);
-    processamento.setMensagemErro(mensagemErro);
-    processamento.setTimestampConclusao(LocalDateTime.now());
-    repository.save(processamento);
-  }
-  
-  private void registrarSucessoProcessamento(ProcessamentoJpa processamento, String linkArquivo) {
-    processamento.setStatusProcessamento(StatusProcessamento.SUCESSO);
-    processamento.setLinkDownload(linkArquivo);
-    processamento.setTimestampConclusao(LocalDateTime.now());
-    repository.save(processamento);
   }
 }
