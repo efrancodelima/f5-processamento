@@ -2,9 +2,12 @@ package br.com.fiap.soat.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -31,7 +34,8 @@ public class ProcessamentoJpa implements Serializable {
   @Column(name = "nome_video", nullable = false)
   private String nomeVideo;
 
-  @Column(name = "usuario", nullable = false)
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "usuario_id", nullable = false)
   private UsuarioJpa usuario;
 
   @Column(name = "status_processamento", nullable = false)

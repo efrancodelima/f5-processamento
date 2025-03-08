@@ -5,6 +5,7 @@ import br.com.fiap.soat.exception.ApplicationException;
 import br.com.fiap.soat.exception.BadGatewayException;
 import br.com.fiap.soat.exception.messages.ApplicationMessage;
 import br.com.fiap.soat.exception.messages.BadGatewayMessage;
+import br.com.fiap.soat.util.LoggerAplicacao;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -57,6 +58,7 @@ public class JwtAuthFilter extends HttpFilter {
       request.setAttribute("claims", claims);
 
     } catch (Exception e) {
+      LoggerAplicacao.error(e.getMessage());
       response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Acesso não autorizado.");
       return;
     }
@@ -179,9 +181,9 @@ public class JwtAuthFilter extends HttpFilter {
 
   private void checkTokenIssuer(Claims claims) throws ApplicationException {
     
-    var emissor = claims.get("iss");
+    String emissor = (String) claims.get("iss");
     
-    if (emissor != Constantes.EMISSOR_CERTIFICADO) {
+    if (!emissor.equals(Constantes.EMISSOR_CERTIFICADO)) {
       throw new ApplicationException(ApplicationMessage.emissorInvalido);
     }
   }

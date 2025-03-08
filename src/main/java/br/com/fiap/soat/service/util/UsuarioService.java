@@ -28,7 +28,7 @@ public class UsuarioService {
     String email = (String) claims.get("email");
     
     var usuarioOpt = usuarioRepository.findByEmail(email);
-    
+
     if (usuarioOpt.isPresent()) {
       return usuarioOpt.get();
     }
