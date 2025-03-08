@@ -14,12 +14,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ProcessamentoService {
-  
-  private final UsuarioJpa usuario = new UsuarioJpa(1L, "email@email.com");
-
-  private final ProcessamentoRepository repository;
 
   private final NotificacaoService notificacaoService;
+  private final ProcessamentoRepository repository;
 
   // Construtor
   @Autowired
@@ -30,7 +27,7 @@ public class ProcessamentoService {
   }
 
   // Métodos públicos
-  public ProcessamentoJpa registrarInicio(FileWrapper video) {
+  public ProcessamentoJpa registrarInicio(FileWrapper video, UsuarioJpa usuario) {
     var processamento = ProcessamentoJpa.builder()
         .nomeVideo(video.getName())
         .usuario(usuario)

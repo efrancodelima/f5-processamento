@@ -13,7 +13,7 @@ public class ListarVideosService {
 
   // Atributos
   private final ProcessamentoRepository repository;
-  private UsuarioJpa usuario = new UsuarioJpa(1L, "email@email.com");
+  private UsuarioJpa usuario;
 
   // Construtor
   @Autowired

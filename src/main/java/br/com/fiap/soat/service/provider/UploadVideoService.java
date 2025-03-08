@@ -1,6 +1,8 @@
 package br.com.fiap.soat.service.provider;
 
+import br.com.fiap.soat.entity.UsuarioJpa;
 import br.com.fiap.soat.service.util.CapturarImagensService;
+import br.com.fiap.soat.service.util.UsuarioService;
 import br.com.fiap.soat.util.RemoverElementosNulos;
 import br.com.fiap.soat.wrapper.FileWrapper;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,13 +30,13 @@ public class UploadVideoService {
   // Métodos públicos
   public void execute(HttpServletRequest requisicao, List<MultipartFile> videos) {
 
-    usuarioService.getUsuario(requisicao);
+    UsuarioJpa usuario = usuarioService.getUsuario(requisicao);
 
     RemoverElementosNulos.remover(videos);
     List<FileWrapper> videosWrapper = encapsularRequisicao(videos);
 
     for (var video : videosWrapper) {
-      capturarImagensService.execute(video); // método assíncrono
+      capturarImagensService.execute(video, usuario); // método assíncrono
     }
   }
 

@@ -28,11 +28,6 @@ public class UploadVideoImpl implements UploadVideo {
   public ResponseEntity<Object> receberVideo(HttpServletRequest requisicao,
       @RequestParam("file") List<MultipartFile> videos) {
 
-    LoggerAplicacao.info("\nCONTROLADOR\n");
-    LoggerAplicacao.info(
-        requisicao.getAttribute("claims").toString()
-    );
-
     service.execute(requisicao, videos);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
   }

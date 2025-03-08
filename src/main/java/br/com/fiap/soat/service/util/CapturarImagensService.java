@@ -1,6 +1,7 @@
 package br.com.fiap.soat.service.util;
 
 import br.com.fiap.soat.entity.ProcessamentoJpa;
+import br.com.fiap.soat.entity.UsuarioJpa;
 import br.com.fiap.soat.util.ApagarDiretorio;
 import br.com.fiap.soat.util.CompactarArquivos;
 import br.com.fiap.soat.util.ExtrairImagens;
@@ -25,17 +26,18 @@ public class CapturarImagensService {
   @Autowired
   public CapturarImagensService(ProcessamentoService procService) {
     this.procService = procService;
+
   }
 
   // Método público
   @Async
-  public CompletableFuture<Void> execute(FileWrapper video) {
+  public CompletableFuture<Void> execute(FileWrapper video, UsuarioJpa usuario) {
 
     String uniqueId = UUID.randomUUID().toString();
     String diretorioBaseStr = TEMP_DIR + uniqueId;
     String diretorioImagensStr = diretorioBaseStr + "/imagens";
     String caminhoArquivoZip = diretorioBaseStr + "/imagens.zip";
-    ProcessamentoJpa processamento = procService.registrarInicio(video);
+    ProcessamentoJpa processamento = procService.registrarInicio(video, usuario);
     String nomeVideo = video.getName();
     
     if (video.getContent().length == 0) {
