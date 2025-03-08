@@ -2,6 +2,8 @@ package br.com.fiap.soat.service.consumer;
 
 import br.com.fiap.soat.dto.EmailDto;
 import br.com.fiap.soat.exception.BadGatewayException;
+import br.com.fiap.soat.exception.messages.BadGatewayMessage;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -36,7 +38,7 @@ public class NotificacaoService {
           new ParameterizedTypeReference<Void>() {});
 
     } catch (Exception e) {
-      throw new BadGatewayException();
+      throw new BadGatewayException(BadGatewayMessage.notificacao);
     }
   }
 }

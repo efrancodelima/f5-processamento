@@ -6,9 +6,9 @@ import br.com.fiap.soat.mapper.ProcessamentoMapper;
 import br.com.fiap.soat.repository.ProcessamentoRepository;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-@Component
+@Service
 public class ListarVideosService {
 
   // Atributos

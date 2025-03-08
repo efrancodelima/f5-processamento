@@ -1,10 +1,10 @@
 package br.com.fiap.soat.exception;
 
+import br.com.fiap.soat.exception.messages.BadGatewayMessage;
+
 public class BadGatewayException extends Exception {
 
-  // Só tem uma mensagem pré-definida para esse tipo de exceção
-  public BadGatewayException() {
-    super("Erro na comunicação com o microsserviço de comunicação.");
+  public BadGatewayException(BadGatewayMessage enumMsg) {
+    super(enumMsg.getMessage());
   }
-  
 }

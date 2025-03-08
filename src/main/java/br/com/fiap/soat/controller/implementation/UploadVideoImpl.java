@@ -2,6 +2,8 @@ package br.com.fiap.soat.controller.implementation;
 
 import br.com.fiap.soat.controller.contract.UploadVideo;
 import br.com.fiap.soat.service.provider.UploadVideoService;
+import br.com.fiap.soat.util.LoggerAplicacao;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,8 +25,15 @@ public class UploadVideoImpl implements UploadVideo {
   }
 
   @Override
-  public ResponseEntity<Object> receberVideo(@RequestParam("file") List<MultipartFile> videos) {
-    service.execute(videos);
+  public ResponseEntity<Object> receberVideo(HttpServletRequest requisicao,
+      @RequestParam("file") List<MultipartFile> videos) {
+
+    LoggerAplicacao.info("\nCONTROLADOR\n");
+    LoggerAplicacao.info(
+        requisicao.getAttribute("claims").toString()
+    );
+
+    service.execute(requisicao, videos);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
   }
 }
