@@ -1,5 +1,6 @@
 package br.com.fiap.soat.controller.filter;
 
+import br.com.fiap.soat.constants.Constantes;
 import br.com.fiap.soat.exception.ApplicationException;
 import br.com.fiap.soat.exception.BadGatewayException;
 import br.com.fiap.soat.exception.messages.ApplicationMessage;
@@ -52,6 +53,7 @@ public class JwtAuthFilter extends HttpFilter {
       String kid = getKeyKid(header);
       PublicKey publicKey = getPublicKey(kid);
       Claims claims = getTokenClaims(token, publicKey);
+      checkTokenIssuer(claims);
       request.setAttribute("claims", claims);
 
     } catch (Exception e) {
@@ -151,8 +153,7 @@ public class JwtAuthFilter extends HttpFilter {
   private Map<String, String> getGoogleCertificates()
       throws BadGatewayException, MalformedURLException {
 
-    URL urlCertificado = new URL("https://www.googleapis.com/"
-        + "robot/v1/metadata/x509/securetoken@system.gserviceaccount.com");
+    URL urlCertificado = new URL(Constantes.URL_GOOGLE_CERTS);
 
     try (InputStream is = urlCertificado.openStream();
         BufferedReader reader = new BufferedReader(
@@ -174,5 +175,14 @@ public class JwtAuthFilter extends HttpFilter {
         .build()
         .parseClaimsJws(token)
         .getBody();
+  }
+
+  private void checkTokenIssuer(Claims claims) throws ApplicationException {
+    
+    var emissor = claims.get("iss");
+    
+    if (emissor != Constantes.EMISSOR_CERTIFICADO) {
+      throw new ApplicationException(ApplicationMessage.emissorInvalido);
+    }
   }
 }

@@ -11,17 +11,21 @@ public class UsuarioService {
 
   public UsuarioJpa getUsuario(HttpServletRequest requisicao) {
 
-    LoggerAplicacao.info("chegou no GETuSUARIO");
+    Claims claims = (Claims) requisicao.getAttribute("claims");
 
-    // String nome = (String) requisicao.getAttribute("name");
-    // String email = (String) requisicao.getAttribute("email");
-    // String emissor = (String) requisicao.getAttribute("iss");
+    String nome = (String) claims.get("name");
+    String email = (String) claims.get("email");
+    String emissor = (String) claims.get("iss");
 
-    // LoggerAplicacao.info(nome);
-    // LoggerAplicacao.info(email);
-    // LoggerAplicacao.info(emissor);
+    LoggerAplicacao.info(nome);
+    LoggerAplicacao.info(email);
+    LoggerAplicacao.info(emissor);
 
-    return new UsuarioJpa();
+    var usuario = new UsuarioJpa();
+    usuario.setNome(nome);
+    usuario.setEmail(email);
+    
+    return usuario;
   }
   
 }

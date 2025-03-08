@@ -22,6 +22,9 @@ public class UsuarioJpa implements Serializable {
   @Column(name = "id")
   private Long id;
 
+  @Column(name = "nome", nullable = false)
+  private String nome;
+
   @Column(name = "email", nullable = false)
   private String email;
 

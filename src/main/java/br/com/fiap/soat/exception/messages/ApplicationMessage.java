@@ -7,7 +7,8 @@ public enum ApplicationMessage {
   tokenInvalido("Token inválido."),
   cabecalhoNulo("Token inválido (cabeçalho nulo)."),
   kidAusente("Token inválido (kid ausente)."),
-  certNaoEncontrado("Token inválido (certificado não encontrado).");
+  certNaoEncontrado("Token inválido (certificado não encontrado)."),
+  emissorInvalido("Token inválido (emissor inválido).");
 
 
   private String mensagem;
