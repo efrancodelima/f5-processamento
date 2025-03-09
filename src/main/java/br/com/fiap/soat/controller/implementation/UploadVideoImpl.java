@@ -2,7 +2,6 @@ package br.com.fiap.soat.controller.implementation;
 
 import br.com.fiap.soat.controller.contract.UploadVideo;
 import br.com.fiap.soat.service.provider.UploadVideoService;
-import br.com.fiap.soat.util.LoggerAplicacao;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;

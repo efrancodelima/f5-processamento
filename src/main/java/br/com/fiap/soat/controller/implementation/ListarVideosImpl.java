@@ -3,6 +3,7 @@ package br.com.fiap.soat.controller.implementation;
 import br.com.fiap.soat.controller.contract.ListarVideos;
 import br.com.fiap.soat.dto.ProcessamentoDto;
 import br.com.fiap.soat.service.provider.ListarVideosService;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,8 +23,8 @@ public class ListarVideosImpl implements ListarVideos {
   }
 
   @Override
-  public ResponseEntity<Object> listarVideos() {
-    List<ProcessamentoDto> lista = service.execute();
+  public ResponseEntity<Object> listarVideos(HttpServletRequest requisicao) {
+    List<ProcessamentoDto> lista = service.execute(requisicao);
     return ResponseEntity.status(HttpStatus.OK).body(lista);
   }
 }
