@@ -44,7 +44,7 @@ public class ProcessamentoJpa implements Serializable {
   @Column(name = "mensagem_erro")
   private String mensagemErro;
 
-  @Column(name = "link_download")
+  @Column(name = "link_download", length = 500)
   private String linkDownload;
 
   @Column(name = "timestamp_inicio", nullable = false)

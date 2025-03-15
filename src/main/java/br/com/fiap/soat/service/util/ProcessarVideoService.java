@@ -11,17 +11,20 @@ import br.com.fiap.soat.wrapper.FileWrapper;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.core.sync.RequestBody;
-import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
 
 @Component
 public class ProcessarVideoService {
@@ -29,8 +32,9 @@ public class ProcessarVideoService {
   // Atributos
   private static final String TEMP_DIR = "/tmp/";
   private static final int INTERVALO = 15;
+  private static final int DURACAO_LINK_MINUTOS = 24 * 60;
   private final ProcessamentoService procService;
-  private final AwsBasicCredentials credenciaisAws;
+  private final AwsConfig awsConfig;
   
   ProcessamentoJpa processamento;
 
@@ -38,7 +42,7 @@ public class ProcessarVideoService {
   @Autowired
   public ProcessarVideoService(ProcessamentoService procService, AwsConfig awsConfig) {
     this.procService = procService;
-    this.credenciaisAws = awsConfig.pegarCredenciais();
+    this.awsConfig = awsConfig;
   }
 
   // Método público
@@ -50,26 +54,30 @@ public class ProcessarVideoService {
     String diretorioImagensStr = diretorioBaseStr + "/imagens";
     String caminhoArquivoZip = diretorioBaseStr + "/imagens.zip";
     processamento = procService.registrarInicio(video, usuario);
-    String fileKeyS3 = usuario.getId().toString() + "/" + processamento.getNumeroVideo()
+    
+    String objectKeyS3 = usuario.getId().toString() + "/" + processamento.getNumeroVideo()
         + "_" + video.getName();
-    
-    String bucketName = "imagens-compactadas";
-    
+
     try {
       verificarConteudoVideo(video);
+
       File videoFile = salvarVideo(video, diretorioBaseStr);
+      
       extrairImagensVideo(videoFile, diretorioImagensStr);
+      
       videoFile.delete();
-      compactarImagens(diretorioImagensStr, caminhoArquivoZip);
+      
+      File arquivoZip = compactarImagens(diretorioImagensStr, caminhoArquivoZip);
+      
       ApagarDiretorio.apagar(diretorioImagensStr);
       
-      // Precisa das variáveis de ambiente AWS_ACCESS_KEY_ID e AWS_SECRET_ACCESS_KEY
-      salvarNoBucketS3(bucketName, fileKeyS3, Paths.get(caminhoArquivoZip));
+      salvarNoBucketS3(objectKeyS3, Paths.get(caminhoArquivoZip));
       
-      // falta gerar a URL com o S3Presigner
-      // É uma URL pré-assinado que tem data de validade
+      arquivoZip.delete();
 
-      procService.registrarConclusao(processamento, "https://example.com/");
+      String linkDownload = gerarLinkParaDownload(objectKeyS3);
+      
+      procService.registrarConclusao(processamento, linkDownload);
       return CompletableFuture.completedFuture(true);
 
     } catch (Exception e) {
@@ -87,9 +95,9 @@ public class ProcessarVideoService {
     }
   }
 
-  private File salvarVideo(FileWrapper video, String diretorioBaseStr) throws Exception {
+  private File salvarVideo(FileWrapper video, String diretorio) throws Exception {
     try {
-      return SalvarArquivo.salvar(video, diretorioBaseStr);
+      return SalvarArquivo.salvar(video, diretorio);
     } catch (Exception e) {
       String mensagem = "Ocorreu um erro ao salvar o arquivo.";
       procService.registrarErro(processamento, mensagem);
@@ -115,11 +123,11 @@ public class ProcessarVideoService {
     }
   }
 
-  private void compactarImagens(String diretorioImagens, String caminhoArquivoZip)
+  private File compactarImagens(String diretorioImagens, String caminhoArquivoZip)
       throws Exception {
     
     try {
-      CompactarArquivos.compactar(diretorioImagens, caminhoArquivoZip);
+      return CompactarArquivos.compactar(diretorioImagens, caminhoArquivoZip);
     } catch (Exception e) {
       String mensagem = "Ocorreu um erro ao compactar as imagens.";
       procService.registrarErro(processamento, mensagem);
@@ -128,18 +136,18 @@ public class ProcessarVideoService {
     }
   }
 
-  private void salvarNoBucketS3(String bucketName, String fileKeyS3, Path localPath)
+  private void salvarNoBucketS3(String objectKey, Path localPath)
       throws Exception {
 
     try {
       S3Client s3 = S3Client.builder()
-          .region(Region.US_EAST_1)
-          .credentialsProvider(StaticCredentialsProvider.create(credenciaisAws))
+          .region(awsConfig.pegarRegiao())
+          .credentialsProvider(StaticCredentialsProvider.create(awsConfig.pegarCredenciais()))
           .build();
       
       PutObjectRequest putRequest = PutObjectRequest.builder()
-          .bucket(bucketName)
-          .key(fileKeyS3)
+          .bucket(awsConfig.getBucketName())
+          .key(objectKey)
           .build();
 
       s3.putObject(putRequest, RequestBody.fromFile(localPath));
@@ -147,8 +155,35 @@ public class ProcessarVideoService {
     } catch (RuntimeException e) {
       String mensagem = "Ocorreu um erro ao salvar as imagens.";
       procService.registrarErro(processamento, mensagem);
-
       throw new Exception(mensagem);
+    }
+  }
+
+  private String gerarLinkParaDownload(String objectKey) throws Exception {
+    // Configura o AWS Presigner
+    S3Presigner presigner = S3Presigner.builder()
+        .region(awsConfig.pegarRegiao())
+        .credentialsProvider(DefaultCredentialsProvider.create())
+        .build();
+    
+    try {
+      // Cria a requisição
+      GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
+          .getObjectRequest(req -> req.bucket(awsConfig.getBucketName()).key(objectKey))
+          .signatureDuration(Duration.ofMinutes(DURACAO_LINK_MINUTOS))
+          .build();
+
+      // Gera o link e retorna
+      PresignedGetObjectRequest presignedRequest = presigner.presignGetObject(presignRequest);
+      return presignedRequest.url().toString();
+    
+    } catch (RuntimeException e) {
+      String mensagem = "Ocorreu um erro ao gerar o link para download das imagens.";
+      procService.registrarErro(processamento, mensagem);
+      throw new Exception(mensagem);
+    
+    } finally {
+      presigner.close();  
     }
   }
 }

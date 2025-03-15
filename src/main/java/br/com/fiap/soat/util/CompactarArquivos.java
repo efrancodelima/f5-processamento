@@ -1,5 +1,6 @@
 package br.com.fiap.soat.util;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
@@ -12,7 +13,7 @@ public class CompactarArquivos {
 
   private CompactarArquivos() {}
   
-  public static void compactar(String diretorioArquivos, String caminhoArquivoZip)
+  public static File compactar(String diretorioArquivos, String caminhoArquivoZip)
       throws IOException {
 
     Path zipFile = Files.createFile(Paths.get(caminhoArquivoZip));
@@ -32,5 +33,6 @@ public class CompactarArquivos {
             }
           });
     }
+    return zipFile.toFile();
   }
 }

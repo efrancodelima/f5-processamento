@@ -24,7 +24,8 @@ spring:
 aws:
   access-key-id: ${AWS_ACCESS_KEY_ID}
   secret-access-key: ${AWS_SECRET_ACCESS_KEY}
-  region: us-east-1
+  region: ${AWS_REGION}
+  bucket-name: ${AWS_BUCKET_NAME}
 notificacao:
   service:
     url: ${URL_SERV_NOTIFICACAO}
