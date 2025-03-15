@@ -21,6 +21,10 @@ spring:
       location: /tmp
       max-file-size: 300MB
       max-request-size: 300MB
+aws:
+  access-key-id: ${AWS_ACCESS_KEY_ID}
+  secret-access-key: ${AWS_SECRET_ACCESS_KEY}
+  region: us-east-1
 notificacao:
   service:
     url: ${URL_SERV_NOTIFICACAO}
