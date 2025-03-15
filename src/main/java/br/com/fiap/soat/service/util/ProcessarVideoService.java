@@ -16,7 +16,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -26,18 +26,17 @@ import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
 
-@Component
+@Service
 public class ProcessarVideoService {
 
   // Atributos
   private static final String TEMP_DIR = "/tmp/";
-  private static final int INTERVALO = 15;
+  private static final int INTERVALO_CAPTURA = 15;
   private static final int DURACAO_LINK_MINUTOS = 24 * 60;
+  
   private final ProcessamentoService procService;
   private final AwsConfig awsConfig;
   
-  ProcessamentoJpa processamento;
-
   // Construtor
   @Autowired
   public ProcessarVideoService(ProcessamentoService procService, AwsConfig awsConfig) {
@@ -50,32 +49,32 @@ public class ProcessarVideoService {
   public CompletableFuture<Boolean> execute(FileWrapper video, UsuarioJpa usuario) {
 
     String uniqueId = UUID.randomUUID().toString();
-    String diretorioBaseStr = TEMP_DIR + uniqueId;
-    String diretorioImagensStr = diretorioBaseStr + "/imagens";
-    String caminhoArquivoZip = diretorioBaseStr + "/imagens.zip";
-    processamento = procService.registrarInicio(video, usuario);
+    String diretorioBase = TEMP_DIR + uniqueId;
+    String diretorioImagens = diretorioBase + "/imagens";
+    String caminhoArquivoZip = diretorioBase + "/imagens.zip";
+    ProcessamentoJpa processamento = procService.registrarInicio(video, usuario);
     
     String objectKeyS3 = usuario.getId().toString() + "/" + processamento.getNumeroVideo()
         + "_" + video.getName();
 
     try {
-      verificarConteudoVideo(video);
+      verificarConteudoVideo(video, processamento);
 
-      File videoFile = salvarVideo(video, diretorioBaseStr);
+      File videoFile = salvarVideo(video, diretorioBase, processamento);
       
-      extrairImagensVideo(videoFile, diretorioImagensStr);
+      extrairImagensVideo(videoFile, diretorioImagens, processamento);
       
       videoFile.delete();
       
-      File arquivoZip = compactarImagens(diretorioImagensStr, caminhoArquivoZip);
+      File arquivoZip = compactarImagens(diretorioImagens, caminhoArquivoZip, processamento);
       
-      ApagarDiretorio.apagar(diretorioImagensStr);
+      ApagarDiretorio.apagar(diretorioImagens);
       
-      salvarNoBucketS3(objectKeyS3, Paths.get(caminhoArquivoZip));
+      salvarNoBucketS3(objectKeyS3, Paths.get(caminhoArquivoZip), processamento);
       
       arquivoZip.delete();
 
-      String linkDownload = gerarLinkParaDownload(objectKeyS3);
+      String linkDownload = gerarLinkParaDownload(objectKeyS3, processamento);
       
       procService.registrarConclusao(processamento, linkDownload);
       return CompletableFuture.completedFuture(true);
@@ -85,7 +84,7 @@ public class ProcessarVideoService {
     }
   }
 
-  private void verificarConteudoVideo(FileWrapper video)
+  private void verificarConteudoVideo(FileWrapper video, ProcessamentoJpa processamento)
       throws Exception {
     
     if (video.getContent() == null || video.getContent().length == 0) {
@@ -95,7 +94,9 @@ public class ProcessarVideoService {
     }
   }
 
-  private File salvarVideo(FileWrapper video, String diretorio) throws Exception {
+  private File salvarVideo(FileWrapper video, String diretorio, ProcessamentoJpa processamento)
+      throws Exception {
+    
     try {
       return SalvarArquivo.salvar(video, diretorio);
     } catch (Exception e) {
@@ -105,9 +106,11 @@ public class ProcessarVideoService {
     }
   }
 
-  private void extrairImagensVideo(File video, String diretorioImagens) throws Exception {
+  private void extrairImagensVideo(File video, String diretorioImagens,
+      ProcessamentoJpa processamento) throws Exception {
+
     try {
-      ExtrairImagens.extrair(video, INTERVALO, diretorioImagens);
+      ExtrairImagens.extrair(video, INTERVALO_CAPTURA, diretorioImagens);
 
     } catch (Exception e) {
       String mensagem;
@@ -123,8 +126,8 @@ public class ProcessarVideoService {
     }
   }
 
-  private File compactarImagens(String diretorioImagens, String caminhoArquivoZip)
-      throws Exception {
+  private File compactarImagens(String diretorioImagens, String caminhoArquivoZip,
+      ProcessamentoJpa processamento) throws Exception {
     
     try {
       return CompactarArquivos.compactar(diretorioImagens, caminhoArquivoZip);
@@ -136,7 +139,7 @@ public class ProcessarVideoService {
     }
   }
 
-  private void salvarNoBucketS3(String objectKey, Path localPath)
+  private void salvarNoBucketS3(String objectKey, Path localPath, ProcessamentoJpa processamento)
       throws Exception {
 
     try {
@@ -159,7 +162,9 @@ public class ProcessarVideoService {
     }
   }
 
-  private String gerarLinkParaDownload(String objectKey) throws Exception {
+  private String gerarLinkParaDownload(String objectKey, ProcessamentoJpa processamento)
+      throws Exception {
+    
     // Configura o AWS Presigner
     S3Presigner presigner = S3Presigner.builder()
         .region(awsConfig.pegarRegiao())
