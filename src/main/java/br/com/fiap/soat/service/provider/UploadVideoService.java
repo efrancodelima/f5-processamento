@@ -1,7 +1,7 @@
 package br.com.fiap.soat.service.provider;
 
 import br.com.fiap.soat.entity.UsuarioJpa;
-import br.com.fiap.soat.service.util.CapturarImagensService;
+import br.com.fiap.soat.service.util.ProcessarVideoService;
 import br.com.fiap.soat.service.util.UsuarioService;
 import br.com.fiap.soat.util.RemoverElementosNulos;
 import br.com.fiap.soat.wrapper.FileWrapper;
@@ -17,14 +17,14 @@ public class UploadVideoService {
 
   // Atributos
   private final UsuarioService usuarioService;
-  private final CapturarImagensService capturarImagensService;
+  private final ProcessarVideoService processarVideoService;
 
   // Construtores
   @Autowired
   public UploadVideoService(UsuarioService usuarioService,
-      CapturarImagensService capturarImagensService) {
+      ProcessarVideoService processarVideoService) {
     this.usuarioService = usuarioService;
-    this.capturarImagensService = capturarImagensService;
+    this.processarVideoService = processarVideoService;
   }
 
   // Métodos públicos
@@ -36,7 +36,7 @@ public class UploadVideoService {
     List<FileWrapper> videosWrapper = encapsularRequisicao(videos);
 
     for (var video : videosWrapper) {
-      capturarImagensService.execute(video, usuario); // método assíncrono
+      processarVideoService.execute(video, usuario); // método assíncrono
     }
   }
 

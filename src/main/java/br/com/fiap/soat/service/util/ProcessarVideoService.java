@@ -15,51 +15,74 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 @Component
-public class CapturarImagensService {
+public class ProcessarVideoService {
 
   // Atributos
   private static final String TEMP_DIR = "/tmp/";
   private static final int INTERVALO = 15;
   private final ProcessamentoService procService;
+  ProcessamentoJpa processamento;
 
   // Construtor
   @Autowired
-  public CapturarImagensService(ProcessamentoService procService) {
+  public ProcessarVideoService(ProcessamentoService procService) {
     this.procService = procService;
-
   }
 
   // Método público
   @Async
-  public CompletableFuture<Void> execute(FileWrapper video, UsuarioJpa usuario) {
+  public CompletableFuture<Boolean> execute(FileWrapper video, UsuarioJpa usuario) {
 
     String uniqueId = UUID.randomUUID().toString();
     String diretorioBaseStr = TEMP_DIR + uniqueId;
     String diretorioImagensStr = diretorioBaseStr + "/imagens";
     String caminhoArquivoZip = diretorioBaseStr + "/imagens.zip";
-    ProcessamentoJpa processamento = procService.registrarInicio(video, usuario);
-    String nomeVideo = video.getName();
+    processamento = procService.registrarInicio(video, usuario);
     
-    if (video.getContent().length == 0) {
-      String mensagem = "Não foi possível ler o arquivo " + nomeVideo;
-      procService.registrarErro(processamento, mensagem);
-      return CompletableFuture.completedFuture(null);
-    }
-
-    // Converte o vídeo de MultipartFile para File
-    File videoFile;
     try {
-      videoFile = SalvarArquivo.salvar(video, diretorioBaseStr);
+      verificarConteudoVideo(video);
+      File videoFile = salvarVideo(video, diretorioBaseStr);
+      extrairImagensVideo(videoFile, diretorioImagensStr);
+      videoFile.delete();
+      compactarImagens(diretorioImagensStr, caminhoArquivoZip);
+      ApagarDiretorio.apagar(diretorioImagensStr);
+
+      // Faz o upload do arquivo para o S3 da AWS
+      // É um URL pré-assinado que tem data de validade
+
+      procService.registrarConclusao(processamento, "https://example.com/");
+      return CompletableFuture.completedFuture(true);
+
+    } catch (Exception e) {
+      return CompletableFuture.completedFuture(false);
+    }
+  }
+
+  private void verificarConteudoVideo(FileWrapper video)
+      throws Exception {
+    
+    if (video.getContent() == null || video.getContent().length == 0) {
+      String mensagem = "Não foi possível ler o arquivo " + video.getName();
+      procService.registrarErro(processamento, mensagem);
+      throw new Exception(mensagem);
+    }
+  }
+
+  private File salvarVideo(FileWrapper video, String diretorioBaseStr) throws Exception {
+    try {
+      return SalvarArquivo.salvar(video, diretorioBaseStr);
     } catch (Exception e) {
       String mensagem = "Ocorreu um erro ao salvar o arquivo."
           + ". Por favor, contate o suporte técnico.";
       procService.registrarErro(processamento, mensagem);
-      return CompletableFuture.completedFuture(null);
+      throw e;
     }
+  }
 
-    // Extrai as imagens do vídeo
+  private void extrairImagensVideo(File video, String diretorioImagens) throws Exception {
     try {
-      ExtrairImagens.extrair(videoFile, INTERVALO, diretorioImagensStr);
+      ExtrairImagens.extrair(video, INTERVALO, diretorioImagens);
+
     } catch (Exception e) {
       String mensagem;
 
@@ -70,31 +93,22 @@ public class CapturarImagensService {
             + ". Por favor, contate o suporte técnico.";
       }
       procService.registrarErro(processamento, mensagem);
-      return CompletableFuture.completedFuture(null);
+      
+      throw e;
     }
-    
-    // Apaga o vídeo recebido
-    videoFile.delete();
+  }
 
-    // Compacta as imagens em um arquivo zip
+  private void compactarImagens(String diretorioImagens, String caminhoArquivoZip)
+      throws Exception {
+    
     try {
-      CompactarArquivos.compactar(diretorioImagensStr, caminhoArquivoZip);
+      CompactarArquivos.compactar(diretorioImagens, caminhoArquivoZip);
     } catch (Exception e) {
       String mensagem = "Ocorreu um erro ao compactar as imagens. "
           + "Por favor, contate o suporte técnico.";
       procService.registrarErro(processamento, mensagem);
-      return CompletableFuture.completedFuture(null);
+      
+      throw e;
     }
-
-    // Apaga o diretório das imagens
-    ApagarDiretorio.apagar(diretorioImagensStr);
-
-    // // Faz o upload do arquivo para o S3 da AWS
-    // // É um URL pré-assinado que tem data de validade
-
-
-    // // Encerra
-    procService.registrarConclusao(processamento, "https://example.com/");
-    return CompletableFuture.completedFuture(null);
   }
 }

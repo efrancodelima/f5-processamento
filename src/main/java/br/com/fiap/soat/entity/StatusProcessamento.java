@@ -2,9 +2,9 @@ package br.com.fiap.soat.entity;
 
 public enum StatusProcessamento {
 
-  PENDENTE("Em processamento"),
-  SUCESSO("Finalizado com sucesso"),
-  ERRO("Finalizado com erro");
+  PENDENTE("Processando"),
+  SUCESSO("Sucesso"),
+  ERRO("Erro");
 
   private String mensagem;
 
