@@ -13,7 +13,6 @@ import java.util.concurrent.CompletableFuture;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.mediaconvert.model.CreateJobResponse;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -50,10 +49,10 @@ public class ProcessarVideoService {
 
     String caminhoVideoS3 = usuario.getId().toString() 
         + "/" + processamento.getNumeroVideo()
-        + "_" + video.getName();
+        + "/input/" + video.getName();
     
     String diretorioImagensS3 = usuario.getId().toString() 
-        + "/" + processamento.getNumeroVideo() + "/";
+        + "/output/" + processamento.getNumeroVideo() + "/";
     
 
     try {
@@ -103,13 +102,10 @@ public class ProcessarVideoService {
       ProcessamentoJpa processamento) throws Exception {
 
     try {
-      S3Client s3 = S3Client.builder()
-          .region(awsConfig.obtainRegion())
-          .credentialsProvider(StaticCredentialsProvider.create(awsConfig.createCredentials()))
-          .build();
+      S3Client s3 = awsConfig.buildS3Client();
       
       PutObjectRequest putRequest = PutObjectRequest.builder()
-          .bucket(awsConfig.getBucketVideos())
+          .bucket(awsConfig.getBucketName())
           .key(caminhoVideoS3)
           .build();
 

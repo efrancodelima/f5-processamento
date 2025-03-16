@@ -69,13 +69,13 @@ public class CriarJobService {
   // Métodos privados
   private String getCaminhoVideo(String caminhoVideo) {
     return "s3://BUCKET/FILE_PATH"
-        .replace("BUCKET", awsConfig.getBucketVideos())
+        .replace("BUCKET", awsConfig.getBucketName())
         .replace("FILE_PATH", caminhoVideo);
   }
 
   private String getDiretorioImagens(String diretorioImagens) {
     return "s3://BUCKET/FOLDER_PATH"
-        .replace("BUCKET", awsConfig.getBucketImagens())
+        .replace("BUCKET", awsConfig.getBucketName())
         .replace("FOLDER_PATH", diretorioImagens);
   }
 

@@ -5,8 +5,10 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.mediaconvert.MediaConvertClient;
+import software.amazon.awssdk.services.s3.S3Client;
 
 @Component
 @ConfigurationProperties(prefix = "aws")
@@ -17,18 +19,23 @@ public class AwsConfig {
   private String accessKeyId;
   private String secretAccessKey;
   private String region;
-  private String bucketVideos;
-  private String bucketImagens;
-  private String bucketDownload;
+  private String bucketName;
   private String mediaConvertRoleArn;
   private String mediaConvertEndpoint;
   
-  public AwsBasicCredentials createCredentials() {
-    return AwsBasicCredentials.create(accessKeyId, secretAccessKey);
+  public S3Client buildS3Client() {
+    return S3Client.builder()
+        .region(obtainRegion())
+        .credentialsProvider(StaticCredentialsProvider.create(createCredentials()))
+        .build();
   }
-
+  
   public Region obtainRegion() {
     return Region.of(region.toLowerCase());
+  }
+
+  public AwsBasicCredentials createCredentials() {
+    return AwsBasicCredentials.create(accessKeyId, secretAccessKey);
   }
 
   public MediaConvertClient buildMediaConvertClient() {
