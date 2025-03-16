@@ -1,17 +1,15 @@
-# Tech Challenge - Fase 4
+# Tech Challenge - Fase 5
 
 Projeto realizado como atividade avaliativa do curso de **Software Architecture - Pós-Tech - FIAP**.
 
 Link do projeto no GitHub:
 
-- Microsserviço de PEDIDO: https://github.com/efrancodelima/pedido
-- Microsserviço de PAGAMENTO: https://github.com/efrancodelima/pagamento
-- Microsserviço de PRODUÇÃO: https://github.com/efrancodelima/producao
+- Microsserviço de PROCESSAMENTO: https://github.com/efrancodelima/pedido
+- Microsserviço de NOTIFICACAO: https://github.com/efrancodelima/pagamento
 
 Link do vídeo demonstrando o projeto em execução:
 
 - https://youtu.be/C-mozV9B57o (funcionamento da aplicação e processo de deploy)
-- https://youtu.be/ussy8n-Cozs (atualizações efetuadas na arquitetura)
 
 # Índice
 
@@ -35,6 +33,176 @@ Link do vídeo demonstrando o projeto em execução:
 Desenvolver um sistema para uma lanchonete local em fase de expansão. O sistema deverá realizar o controle dos pedidos, além de outras funções correlatas, conforme especificado no Tech Challenge.
 
 ## 2. Requisitos
+
+### 2.1 Processamento assíncrono
+
+"A nova versão do sistema deve processar mais de um vídeo ao mesmo tempo."
+
+O microsserviço de processamento possui um endpoint para receber um ou mais vídeos.
+
+Deixamos a cargo do cliente da aplicação escolher se deseja enviar vários vídeos em uma requisição só ou em requisições separadas. Em qualquer caso, os vídeos serão processados simultaneamente, em diferentes threads.
+
+Se vier um vídeo por requisição e houver várias requisições simultâneas, o processamento dos vídeos também será simultâneo, pois esse já é o comportamento padrão de um microsserviço Java/Spring: cada requisição roda em uma thread separada.
+
+Se vierem vários vídeos em uma requisição só, o sistema irá encaminhar cada vídeo para uma thread diferente, usando recursos de assincronismo.
+
+### 2.2 Balancemaneto de carga
+
+"Em caso de picos o sistema não deve perder uma requisição."
+
+O sistema roda na AWS ECS, um orquestrador de containeres próprio da AWS. Foi implementado balanceamento de carga para que nenhuma requisição seja perdida. Naturalmente, esse balanceamento deve ser ajustado e redimensionado conforme a demanda da aplicação.
+
+### 2.3 Autenticação
+
+"O Sistema deve ser protegido por usuário e senha."
+
+FORMA DE AUTENTICAÇÃO
+
+Para poder usar o sistema, o usuário deve se autenticar usando sua conta Google.
+Sem se autenticar, o usuário não consegue enviar vídeos, listar os vídeos enviados e visualizar os status de cada um.
+Obviamente, uma vez autenticado, ele tem acesso apenas aos seus próprios vídeos.
+
+Por que escolhi usar a conta Google como forma de autenticação?
+Por dois motivos:
+- Usar uma conta já existente é mais prático e oferece uma experiência mais agradável ao usuário, que não vai precisar preencher um novo cadastro;
+- Hoje em dia a maioria dos usuários web possui uma conta Google (em 2024 o Google tinha mais de 2 bilhões de usuários ativos);
+- Poderia ter usado o Cognito, mas já usei ele no Tech Challenge da fase 3, então não agregaria nenhuma novidade (embora também fosse uma boa solução).
+
+GERADOR DE TOKEN
+
+O token de autenticação é emitido usando o Firebase e tem prazo de validade de 1 hora (podendo ser renovado pela aplicação se o usuário continuar ativo).
+
+Por que escolhi o Firebase para gerar o token?
+O firebase é uma ferramenta interessante porque oferece várias opções de login, permitindo expandir as opções de entrada do sistema no futuro. Exemplos de opções disponíveis: email e senha, número de telefone, Apple sign-in e provedores de identidade federados, tais como o Google, Facebook, Twitter, GitHub, entre outros.
+
+VALIDAÇÃO DO TOKEN NA APLICAÇÃO
+
+O sistema possui 2 microsserviços: "processamento" e "notificação".
+
+O usuário só se comunica com o sistema de processamento, que possui um filtro de autenticação. Esse filtro age de forma global, atuando em todos os endpoints (só tem dois na verdade: enviar e listar vídeos).
+
+O filtro, na hora de validar o token JWT, considera não apenas o conteúdo do token, mas o emissor também (que é a nossa aplicação cadastrada no Firebase). Isso corrobora na segurança do sistema.
+
+O microsserviço de notificação é consumido apenas pelo microsserviço de processamento. Ele roda em uma VPC privada dentro da AWS e não é acessível ao usuário.
+
+
+### 2.4 Listar os status dos vídeos
+
+"O fluxo deve ter uma listagem de status dos vídeos de um usuário."
+
+Esse ponto criou uma certa dúvida se o fluxo citado no documento se referia ao uso de WebFlux ou SSE, mas em contato com os professores pelo Discord foi orientado que se tratava apenas de uma lista.
+
+Inicialmente, eu pensei em criar um endpoint que atualizaria os status dos vídeos de tempos em tempos para o cliente (usando webflux). Mas depois achei melhor criar um endpoint simples que retorna a listagem e deixar nas maõs do cliente o controle sobre a consulta. No caso, o cliente pode ser uma aplicação front end e ela decide quando e em qual intervalo de tempo ela quer consultar a listagem. Ela decide se quer consultar apenas uma vez ou se prefere ir atualizando os status, ela decide quando parar, etc.
+
+O front end não é necessário para a entrega do Tech Challenge, mas eu criei um projeto em Angular bem simples, só para deixar a demonstração da aplicação mais simples. Assim não será necessário ficar inserindo token de autenticação manualmente na requisição.
+
+### 2.5 Notificações
+
+"Em caso de erro um usuário pode ser notificado (email ou um outro meio de comunicação)."
+
+O microsserviço de notificação foi criado só para fazer isso.
+
+Quando o usuário envia um vídeo para processar, ele recebe uma resposta 204 assim que o upload do vídeo é concluído. Quando a aplicação finaliza o processamento de um vídeo, um email é enviado para o usuário notificando a finalização com sucesso ou falha, conforme o caso.
+
+Se for sucesso, o link para download do arquivo zip contendo as imagens vai junto no e-mail. Se houver falha, o motivo da falha é informado no e-mail (pode ser um tipo de arquivo não compatível com o serviço, por exemplo).
+
+
+### 2.6 Persistência dos dados
+
+"O sistema deve persistir os dados."
+
+O sistema persiste os dados de uso do usuário e o arquivo zip gerado.
+
+Com relação à parte multimídia, decidimos não persistir o vídeo em si, o que poderia impactar no custo de armazenamento. O vídeo é descartado após o processamento, apenas o resultado final, o arquivo zip para download é persistido.
+
+Com relação aos dados de utilização do usuário, persistimos:
+- nome e email do usuário;
+- nome do vídeo recebido;
+- timestamp do recebimento do vídeo;
+- status do vídeo;
+- timestamp do status;
+- mensagem de erro, se houver;
+- link para download do arquivo zip.
+
+Isso tudo será detalhado melhor mais à frente na parte de banco de dados.
+
+
+### 2.7 Escalabilidade
+
+"O sistema deve estar em uma arquitetura que o permita ser escalado."
+
+Ok, o sistema roda na AWS ECS e utiliza o banco de dados AWS Aurora. Ambos são escaláveis.
+
+### 2.8 Repositórios
+
+"O projeto deve ser versionado no Github."
+
+Ok, os links para os repositórios se encontram no início deste documento. Os repositórios têm a branch main protegida e só aceitam merge por meio de pull request.
+
+
+### 2.9 Qualidade do software
+
+"O projeto deve ter testes que garantam a sua qualidade."
+
+Cada microsserviço possui cobertura de testes mínima de 80% e análise de issues/vulnerabilidades pelo Sonar.
+
+Na pipeline, após a análise do Sonar, tem um step para validar da qualidade do código. Essa validação é feita com um script bash que pega os dados do Sonar Cloud (utilizando a API Web que ele disponibiliza) e verifica se os valores estão ok.
+
+O script confere e imprime os dados, item por item, no log da pipeline:
+- coverage analysis (tests errors, testes failures, coverage and line coverage);
+- security analysis (vulnerabilities, hotspots and rating);
+- reliability analysis (bugs and rating);
+- maintainability analysis (code smells and rating);
+- quality gate (status).
+
+### 2.10 Pipeline
+
+"CI/CD da aplicação."
+
+A pipeline segue o padrão dos projetos anteriores: ela valida a qualidade do código (conforme descrito no item anterior) e, se a qualidade estiver ok, faz o build da imagem docker, faz o push no ECR e o deploy no ECS. Se der qualquer erro, a pipeline é interrompida.
+
+
+## 3 Evidência dos testes
+
+## 4 Banco de dados
+
+### 4.1 Modelagem
+
+### 4.2 Script de criação
+
+O script segue abaixo:
+
+```SQL
+CREATE TABLE IF NOT EXISTS usuario (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS processamento (
+    numero_video BIGINT AUTO_INCREMENT PRIMARY KEY,
+    nome_video VARCHAR(255) NOT NULL,
+    usuario_id BIGINT NOT NULL,
+    status_processamento VARCHAR(255) NOT NULL,
+    mensagem_erro TEXT,
+    link_download VARCHAR(500),
+    timestamp_inicio DATETIME NOT NULL,
+    timestamp_conclusao DATETIME,
+    CONSTRAINT fk_usuario FOREIGN KEY (usuario_id) REFERENCES usuario(id)
+);
+```
+
+## Projetos futuros
+
+Como ideias para projetos futuros, poderíamos expandir as opções de autenticação do usuário e criar um microsserviço para pagamento da assinatura (supondo que o microsserviço seja pago, não custeado com anúncios ou outras formas de financiamento).
+
+
+
+
+
+
+
+
 
 ### 2.1. Arquitetura
 
