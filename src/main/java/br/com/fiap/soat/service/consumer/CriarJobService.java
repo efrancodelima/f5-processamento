@@ -1,4 +1,4 @@
-package br.com.fiap.soat.service.util;
+package br.com.fiap.soat.service.consumer;
 
 import br.com.fiap.soat.config.AwsConfig;
 import br.com.fiap.soat.util.LoggerAplicacao;

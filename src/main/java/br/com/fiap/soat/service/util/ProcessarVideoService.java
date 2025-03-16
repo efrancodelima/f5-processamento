@@ -3,6 +3,7 @@ package br.com.fiap.soat.service.util;
 import br.com.fiap.soat.config.AwsConfig;
 import br.com.fiap.soat.entity.ProcessamentoJpa;
 import br.com.fiap.soat.entity.UsuarioJpa;
+import br.com.fiap.soat.service.consumer.CriarJobService;
 import br.com.fiap.soat.util.SalvarArquivo;
 import br.com.fiap.soat.wrapper.FileWrapper;
 import java.io.File;
@@ -66,7 +67,7 @@ public class ProcessarVideoService {
 
       String jobId = criarJob(caminhoVideoS3, diretorioImagensS3, processamento);
 
-      // registroService.registrarJob(processamento, jobId);
+      registroService.registrarJob(processamento, jobId);
 
       return CompletableFuture.completedFuture(true);
 
