@@ -3,44 +3,39 @@ package br.com.fiap.soat.service.util;
 import br.com.fiap.soat.config.AwsConfig;
 import br.com.fiap.soat.entity.ProcessamentoJpa;
 import br.com.fiap.soat.entity.UsuarioJpa;
-import br.com.fiap.soat.util.ApagarDiretorio;
-import br.com.fiap.soat.util.CompactarArquivos;
-import br.com.fiap.soat.util.ExtrairImagens;
+import br.com.fiap.soat.util.LoggerAplicacao;
 import br.com.fiap.soat.util.SalvarArquivo;
 import br.com.fiap.soat.wrapper.FileWrapper;
 import java.io.File;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.Duration;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.mediaconvert.model.CreateJobResponse;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
-import software.amazon.awssdk.services.s3.presigner.S3Presigner;
-import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
-import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
 
 @Service
 public class ProcessarVideoService {
 
   // Atributos
   private static final String TEMP_DIR = "/tmp/";
-  private static final int INTERVALO_CAPTURA = 15;
-  private static final int DURACAO_LINK_MINUTOS = 24 * 60;
   
-  private final ProcessamentoService procService;
+  private final RegistroService registroService;
+  private final ExtrairImagensService extrairImagensService;
   private final AwsConfig awsConfig;
   
   // Construtor
   @Autowired
-  public ProcessarVideoService(ProcessamentoService procService, AwsConfig awsConfig) {
-    this.procService = procService;
+  public ProcessarVideoService(RegistroService registroService,
+      ExtrairImagensService extrairImagensService, AwsConfig awsConfig) {
+
+    this.registroService = registroService;
+    this.extrairImagensService = extrairImagensService;
     this.awsConfig = awsConfig;
   }
 
@@ -49,37 +44,49 @@ public class ProcessarVideoService {
   public CompletableFuture<Boolean> execute(FileWrapper video, UsuarioJpa usuario) {
 
     String uniqueId = UUID.randomUUID().toString();
-    String diretorioBase = TEMP_DIR + uniqueId;
-    String diretorioImagens = diretorioBase + "/imagens";
-    String caminhoArquivoZip = diretorioBase + "/imagens.zip";
-    ProcessamentoJpa processamento = procService.registrarInicio(video, usuario);
+
+    String diretorioBase = TEMP_DIR + uniqueId + "/";
+
+    ProcessamentoJpa processamento = registroService.registrarInicio(video, usuario);
     
-    String objectKeyS3 = usuario.getId().toString() + "/" + processamento.getNumeroVideo()
+    String caminhoVideoS3 = usuario.getId().toString() 
+        + "/" + processamento.getNumeroVideo()
         + "_" + video.getName();
 
     try {
+
       verificarConteudoVideo(video, processamento);
 
+      LoggerAplicacao.info("Conteúdo OK");
+
       File videoFile = salvarVideo(video, diretorioBase, processamento);
-      
-      extrairImagensVideo(videoFile, diretorioImagens, processamento);
+
+      LoggerAplicacao.info("Salvar vídeo OK");
+
+      enviarVideoParaS3(caminhoVideoS3, videoFile.toPath(), processamento);
+
+      LoggerAplicacao.info("Enviar vídeo para o S3 OK");
       
       videoFile.delete();
-      
-      File arquivoZip = compactarImagens(diretorioImagens, caminhoArquivoZip, processamento);
-      
-      ApagarDiretorio.apagar(diretorioImagens);
-      
-      salvarNoBucketS3(objectKeyS3, Paths.get(caminhoArquivoZip), processamento);
-      
-      arquivoZip.delete();
 
-      String linkDownload = gerarLinkParaDownload(objectKeyS3, processamento);
+      LoggerAplicacao.info("Apagar vídeo OK");
+
+      String jobId = iniciarJob(caminhoVideoS3, processamento);
+
+      LoggerAplicacao.info("Iniciar job OK");
       
-      procService.registrarConclusao(processamento, linkDownload);
+      registroService.registrarJob(processamento, jobId);
+
+      LoggerAplicacao.info("Registrar job OK");
+      
       return CompletableFuture.completedFuture(true);
 
     } catch (Exception e) {
+
+      LoggerAplicacao.error(e.getMessage());
+
+      registroService.registrarErro(processamento, e.getMessage());
+
       return CompletableFuture.completedFuture(false);
     }
   }
@@ -89,7 +96,7 @@ public class ProcessarVideoService {
     
     if (video.getContent() == null || video.getContent().length == 0) {
       String mensagem = "Não foi possível ler o arquivo " + video.getName();
-      procService.registrarErro(processamento, mensagem);
+      registroService.registrarErro(processamento, mensagem);
       throw new Exception(mensagem);
     }
   }
@@ -101,46 +108,13 @@ public class ProcessarVideoService {
       return SalvarArquivo.salvar(video, diretorio);
     } catch (Exception e) {
       String mensagem = "Ocorreu um erro ao salvar o arquivo.";
-      procService.registrarErro(processamento, mensagem);
+      registroService.registrarErro(processamento, mensagem);
       throw e;
     }
   }
 
-  private void extrairImagensVideo(File video, String diretorioImagens,
+  private void enviarVideoParaS3(String caminhoVideoS3, Path localPath,
       ProcessamentoJpa processamento) throws Exception {
-
-    try {
-      ExtrairImagens.extrair(video, INTERVALO_CAPTURA, diretorioImagens);
-
-    } catch (Exception e) {
-      String mensagem;
-
-      if (e.getMessage().contains("Could not open input")) {
-        mensagem = "O tipo de arquivo enviado não é compatível com este serviço.";
-      } else {
-        mensagem = "Ocorreu um erro ao extrair as imagens do vídeo.";
-      }
-      procService.registrarErro(processamento, mensagem);
-      
-      throw e;
-    }
-  }
-
-  private File compactarImagens(String diretorioImagens, String caminhoArquivoZip,
-      ProcessamentoJpa processamento) throws Exception {
-    
-    try {
-      return CompactarArquivos.compactar(diretorioImagens, caminhoArquivoZip);
-    } catch (Exception e) {
-      String mensagem = "Ocorreu um erro ao compactar as imagens.";
-      procService.registrarErro(processamento, mensagem);
-      
-      throw e;
-    }
-  }
-
-  private void salvarNoBucketS3(String objectKey, Path localPath, ProcessamentoJpa processamento)
-      throws Exception {
 
     try {
       S3Client s3 = S3Client.builder()
@@ -149,46 +123,30 @@ public class ProcessarVideoService {
           .build();
       
       PutObjectRequest putRequest = PutObjectRequest.builder()
-          .bucket(awsConfig.getBucketName())
-          .key(objectKey)
+          .bucket(awsConfig.getBucketVideos())
+          .key(caminhoVideoS3)
           .build();
 
       s3.putObject(putRequest, RequestBody.fromFile(localPath));
     
     } catch (RuntimeException e) {
-      String mensagem = "Ocorreu um erro ao salvar as imagens.";
-      procService.registrarErro(processamento, mensagem);
+      String mensagem = "Ocorreu um erro ao salvar o vídeo.";
+      
       throw new Exception(mensagem);
     }
   }
 
-  private String gerarLinkParaDownload(String objectKey, ProcessamentoJpa processamento)
+  private String iniciarJob(String caminhoVideoS3, ProcessamentoJpa processamento)
       throws Exception {
     
-    // Configura o AWS Presigner
-    S3Presigner presigner = S3Presigner.builder()
-        .region(awsConfig.pegarRegiao())
-        .credentialsProvider(DefaultCredentialsProvider.create())
-        .build();
-    
     try {
-      // Cria a requisição
-      GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
-          .getObjectRequest(req -> req.bucket(awsConfig.getBucketName()).key(objectKey))
-          .signatureDuration(Duration.ofMinutes(DURACAO_LINK_MINUTOS))
-          .build();
+      CreateJobResponse response = extrairImagensService.iniciarJob(caminhoVideoS3);
+      return response.job().id();
 
-      // Gera o link e retorna
-      PresignedGetObjectRequest presignedRequest = presigner.presignGetObject(presignRequest);
-      return presignedRequest.url().toString();
-    
-    } catch (RuntimeException e) {
-      String mensagem = "Ocorreu um erro ao gerar o link para download das imagens.";
-      procService.registrarErro(processamento, mensagem);
+    } catch (Exception e) {
+      String mensagem = "Ocorreu um erro ao iniciar a extração das imagens.";
+      registroService.registrarErro(processamento, mensagem);
       throw new Exception(mensagem);
-    
-    } finally {
-      presigner.close();  
     }
   }
 }

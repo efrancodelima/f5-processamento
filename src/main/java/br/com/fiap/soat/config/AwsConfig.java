@@ -11,10 +11,14 @@ import software.amazon.awssdk.regions.Region;
 @Data
 public class AwsConfig {
 
+  private String accountId;
   private String accessKeyId;
   private String secretAccessKey;
   private String region;
-  private String bucketName;
+  private String bucketVideos;
+  private String bucketImagens;
+  private String bucketDownload;
+  private String arnRoleMediaConvert;
   
   public AwsBasicCredentials pegarCredenciais() {
     return AwsBasicCredentials.create(accessKeyId, secretAccessKey);

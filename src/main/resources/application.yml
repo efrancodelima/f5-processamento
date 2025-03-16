@@ -22,10 +22,14 @@ spring:
       max-file-size: 300MB
       max-request-size: 300MB
 aws:
+  account-id: ${AWS_ACCOUNT_ID}
   access-key-id: ${AWS_ACCESS_KEY_ID}
   secret-access-key: ${AWS_SECRET_ACCESS_KEY}
   region: ${AWS_REGION}
-  bucket-name: ${AWS_BUCKET_NAME}
+  bucket-videos: ${AWS_BUCKET_VIDEOS}
+  bucket-imagens: ${AWS_BUCKET_IMAGENS}
+  bucket-download: ${AWS_BUCKET_DOWNLOAD}
+  arn-role-media-convert: ${AWS_ARN_ROLE_MC}
 notificacao:
   service:
     url: ${URL_SERV_NOTIFICACAO}

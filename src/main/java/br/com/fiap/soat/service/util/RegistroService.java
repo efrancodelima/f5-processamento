@@ -13,14 +13,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ProcessamentoService {
+public class RegistroService {
 
   private final NotificacaoService notificacaoService;
   private final ProcessamentoRepository repository;
 
   // Construtor
   @Autowired
-  public ProcessamentoService(ProcessamentoRepository repository,
+  public RegistroService(ProcessamentoRepository repository,
       NotificacaoService notificacaoService) {
     this.repository = repository;
     this.notificacaoService = notificacaoService;
@@ -54,6 +54,11 @@ public class ProcessamentoService {
     repository.save(processamento);
 
     notificarSucessoAoUsuario(processamento.getNomeVideo(), linkArquivo);
+  }
+
+  public void registrarJob(ProcessamentoJpa processamento, String jobId) {
+    processamento.setJobId(jobId);
+    repository.save(processamento);
   }
 
   // Métodos privados

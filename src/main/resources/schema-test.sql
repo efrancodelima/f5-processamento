@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS processamento (
     numero_video BIGINT AUTO_INCREMENT PRIMARY KEY,
     nome_video VARCHAR(255) NOT NULL,
     usuario_id BIGINT NOT NULL,
+    job_id VARCHAR(255),
     status_processamento VARCHAR(255) NOT NULL,
     mensagem_erro TEXT,
     link_download VARCHAR(500),

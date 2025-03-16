@@ -36,7 +36,7 @@ public class UploadVideoService {
     List<FileWrapper> videosWrapper = encapsularRequisicao(videos);
 
     for (var video : videosWrapper) {
-      processarVideoService.execute(video, usuario); // método assíncrono
+      processarVideoService.execute(video, usuario);
     }
   }
 
