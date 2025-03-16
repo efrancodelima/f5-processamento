@@ -2,7 +2,6 @@ package br.com.fiap.soat.service.util;
 
 import br.com.fiap.soat.config.AwsConfig;
 import br.com.fiap.soat.util.LoggerAplicacao;
-import java.net.URI;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.mediaconvert.MediaConvertClient;
@@ -28,61 +27,56 @@ import software.amazon.awssdk.services.mediaconvert.model.VideoDescription;
  * Extrai imagens do vídeo usando o AWS Elemental MediaConvert.
  */
 @Service
-public class ExtrairImagensService {
+public class CriarJobService {
 
-  // Atributos estáticos
-  private static final String MEDIA_CONVERT_ENDPOINT
-      = "https://lxlxpswfb.mediaconvert.us-east-1.amazonaws.com";
-
+  // Atributos
   private static final int INTERVALO_CAPTURA = 15;
 
   private final AwsConfig awsConfig;
 
   // Construtor
   @Autowired
-  public ExtrairImagensService(AwsConfig awsConfig) {
+  public CriarJobService(AwsConfig awsConfig) {
     this.awsConfig = awsConfig;
   }
   
   // Método público
-  // idVideo = idUsuario/numeroVideo-nomeVideo
-  public CreateJobResponse iniciarJob(String idVideo) throws Exception {
+  public CreateJobResponse criarJob(String caminhoVideo, String diretorioImagens)
+      throws Exception {
+
+    caminhoVideo = getCaminhoVideo(caminhoVideo);
+    diretorioImagens = getDiretorioImagens(diretorioImagens);
+
+    MediaConvertClient mediaConvertClient = awsConfig.buildMediaConvertClient();
 
     try {
-      MediaConvertClient mediaConvertClient = MediaConvertClient.builder()
-          .endpointOverride(new URI(MEDIA_CONVERT_ENDPOINT))
-          .build();
-    
-      LoggerAplicacao.info("Extrair 1 OK");
-
-      String caminhoVideo = getCaminhoVideo(idVideo);
-      String diretorioImagens = getDiretorioImagens(idVideo);
-
-      LoggerAplicacao.info("Extrair 2 OK");
-
       CreateJobRequest createJobRequest = CreateJobRequest.builder()
-          .role(awsConfig.getArnRoleMediaConvert())
+          .role(awsConfig.getMediaConvertRoleArn())
           .settings(buildJobSettings(caminhoVideo, diretorioImagens))
           .build();
-
-      LoggerAplicacao.info("Extrair 3 OK");
 
       return mediaConvertClient.createJob(createJobRequest);
 
     } catch (Exception e) {
       LoggerAplicacao.error(e.getMessage());
       throw new Exception(e.getMessage());
+    
+    } finally {
+      mediaConvertClient.close();
     }
   }
   
   // Métodos privados
-  private String getCaminhoVideo(String idVideo) {
-    return String.format("s3://%s/%s", awsConfig.getBucketVideos(), idVideo);
+  private String getCaminhoVideo(String caminhoVideo) {
+    return "s3://BUCKET/FILE_PATH"
+        .replace("BUCKET", awsConfig.getBucketVideos())
+        .replace("FILE_PATH", caminhoVideo);
   }
 
-  private String getDiretorioImagens(String idVideo) {
-    return String.format("s3://%s/frames/%s", awsConfig.getBucketImagens(),
-        idVideo);
+  private String getDiretorioImagens(String diretorioImagens) {
+    return "s3://BUCKET/FOLDER_PATH"
+        .replace("BUCKET", awsConfig.getBucketImagens())
+        .replace("FOLDER_PATH", diretorioImagens);
   }
 
   private JobSettings buildJobSettings(String inputFilePath, String outputFolderPath) {

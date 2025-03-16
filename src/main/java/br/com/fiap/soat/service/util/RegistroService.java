@@ -31,7 +31,7 @@ public class RegistroService {
     var processamento = ProcessamentoJpa.builder()
         .nomeVideo(video.getName())
         .usuario(usuario)
-        .statusProcessamento(StatusProcessamento.PENDENTE)
+        .statusProcessamento(StatusProcessamento.RECEBIDO)
         .timestampInicio(LocalDateTime.now())
         .build();
 
@@ -57,6 +57,7 @@ public class RegistroService {
   }
 
   public void registrarJob(ProcessamentoJpa processamento, String jobId) {
+    processamento.setStatusProcessamento(StatusProcessamento.PROCESSANDO);
     processamento.setJobId(jobId);
     repository.save(processamento);
   }

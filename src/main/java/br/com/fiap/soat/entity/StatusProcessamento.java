@@ -2,7 +2,8 @@ package br.com.fiap.soat.entity;
 
 public enum StatusProcessamento {
 
-  PENDENTE("Processando"),
+  RECEBIDO("Recebido"),
+  PROCESSANDO("Processando"),
   SUCESSO("Sucesso"),
   ERRO("Erro");
 

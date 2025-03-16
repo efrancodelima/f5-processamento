@@ -40,7 +40,7 @@ public class ListarVideosService {
 
   private void ordenarLista(List<ProcessamentoJpa> lista) {
     lista.sort(Comparator
-        .comparing((ProcessamentoJpa p) -> !StatusProcessamento.PENDENTE
+        .comparing((ProcessamentoJpa p) -> !StatusProcessamento.RECEBIDO
             .equals(p.getStatusProcessamento()))
         .thenComparing(p -> p.getTimestampInicio(), Comparator.reverseOrder())
     );

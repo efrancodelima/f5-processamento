@@ -3,7 +3,6 @@ package br.com.fiap.soat.service.util;
 import br.com.fiap.soat.config.AwsConfig;
 import br.com.fiap.soat.entity.ProcessamentoJpa;
 import br.com.fiap.soat.entity.UsuarioJpa;
-import br.com.fiap.soat.util.LoggerAplicacao;
 import br.com.fiap.soat.util.SalvarArquivo;
 import br.com.fiap.soat.wrapper.FileWrapper;
 import java.io.File;
@@ -26,13 +25,13 @@ public class ProcessarVideoService {
   private static final String TEMP_DIR = "/tmp/";
   
   private final RegistroService registroService;
-  private final ExtrairImagensService extrairImagensService;
+  private final CriarJobService extrairImagensService;
   private final AwsConfig awsConfig;
   
   // Construtor
   @Autowired
   public ProcessarVideoService(RegistroService registroService,
-      ExtrairImagensService extrairImagensService, AwsConfig awsConfig) {
+      CriarJobService extrairImagensService, AwsConfig awsConfig) {
 
     this.registroService = registroService;
     this.extrairImagensService = extrairImagensService;
@@ -43,50 +42,36 @@ public class ProcessarVideoService {
   @Async
   public CompletableFuture<Boolean> execute(FileWrapper video, UsuarioJpa usuario) {
 
-    String uniqueId = UUID.randomUUID().toString();
-
-    String diretorioBase = TEMP_DIR + uniqueId + "/";
-
     ProcessamentoJpa processamento = registroService.registrarInicio(video, usuario);
     
+    String uniqueId = UUID.randomUUID().toString();
+    String diretorioBase = TEMP_DIR + uniqueId + "/";
+
     String caminhoVideoS3 = usuario.getId().toString() 
         + "/" + processamento.getNumeroVideo()
         + "_" + video.getName();
+    
+    String diretorioImagensS3 = usuario.getId().toString() 
+        + "/" + processamento.getNumeroVideo() + "/";
+    
 
     try {
-
       verificarConteudoVideo(video, processamento);
-
-      LoggerAplicacao.info("Conteúdo OK");
 
       File videoFile = salvarVideo(video, diretorioBase, processamento);
 
-      LoggerAplicacao.info("Salvar vídeo OK");
-
       enviarVideoParaS3(caminhoVideoS3, videoFile.toPath(), processamento);
 
-      LoggerAplicacao.info("Enviar vídeo para o S3 OK");
-      
       videoFile.delete();
 
-      LoggerAplicacao.info("Apagar vídeo OK");
+      String jobId = criarJob(caminhoVideoS3, diretorioImagensS3, processamento);
 
-      String jobId = iniciarJob(caminhoVideoS3, processamento);
+      // registroService.registrarJob(processamento, jobId);
 
-      LoggerAplicacao.info("Iniciar job OK");
-      
-      registroService.registrarJob(processamento, jobId);
-
-      LoggerAplicacao.info("Registrar job OK");
-      
       return CompletableFuture.completedFuture(true);
 
     } catch (Exception e) {
-
-      LoggerAplicacao.error(e.getMessage());
-
       registroService.registrarErro(processamento, e.getMessage());
-
       return CompletableFuture.completedFuture(false);
     }
   }
@@ -118,8 +103,8 @@ public class ProcessarVideoService {
 
     try {
       S3Client s3 = S3Client.builder()
-          .region(awsConfig.pegarRegiao())
-          .credentialsProvider(StaticCredentialsProvider.create(awsConfig.pegarCredenciais()))
+          .region(awsConfig.obtainRegion())
+          .credentialsProvider(StaticCredentialsProvider.create(awsConfig.createCredentials()))
           .build();
       
       PutObjectRequest putRequest = PutObjectRequest.builder()
@@ -136,11 +121,12 @@ public class ProcessarVideoService {
     }
   }
 
-  private String iniciarJob(String caminhoVideoS3, ProcessamentoJpa processamento)
-      throws Exception {
+  private String criarJob(String caminhoVideoS3, String diretorioImagensS3,
+      ProcessamentoJpa processamento) throws Exception {
     
     try {
-      CreateJobResponse response = extrairImagensService.iniciarJob(caminhoVideoS3);
+      CreateJobResponse response = extrairImagensService
+          .criarJob(caminhoVideoS3, diretorioImagensS3);
       return response.job().id();
 
     } catch (Exception e) {
