@@ -44,27 +44,22 @@ public class ProcessarVideoService {
 
     ProcessamentoJpa processamento = registroService.registrarInicio(video, usuario);
     
-    String uniqueId = UUID.randomUUID().toString();
-    String diretorioBase = TEMP_DIR + uniqueId + "/";
+    String diretorioLocal = TEMP_DIR + UUID.randomUUID().toString() + "/";
 
-    String caminhoVideoS3 = usuario.getId().toString() 
-        + "/" + processamento.getNumeroVideo()
-        + "/input/" + video.getName();
-    
-    String diretorioImagensS3 = usuario.getId().toString() 
-        + "/output/" + processamento.getNumeroVideo() + "/";
-    
+    String diretorioS3 = usuario.getId().toString() + "/" + processamento.getNumeroVideo() + "/";
+    String caminhoVideoS3 = diretorioS3 + "input/" + video.getName();
+    String diretorioOutputS3 = diretorioS3 + "output/";
 
     try {
       verificarConteudoVideo(video, processamento);
 
-      File videoFile = salvarVideo(video, diretorioBase, processamento);
+      File videoFile = salvarVideo(video, diretorioLocal, processamento);
 
       enviarVideoParaS3(caminhoVideoS3, videoFile.toPath(), processamento);
 
       videoFile.delete();
 
-      String jobId = criarJob(caminhoVideoS3, diretorioImagensS3, processamento);
+      String jobId = criarJob(caminhoVideoS3, diretorioOutputS3, processamento);
 
       registroService.registrarJob(processamento, jobId);
 
