@@ -5,36 +5,53 @@ import zipfile
 from io import BytesIO
 
 def lambda_handler(event, context):
-    # Pega os detalhes do evento
-    # job_id = event['detail']['jobId']
-    job_id = '1742169170751-d3owk6'
+    # Bucket name
     bucket_name = "main-357"
-    job_output_directory = "2/1/output/"
     
-    # Lista os arquivos do diretório de output do job
+    # Pega o id do job
+    job_id = event.get("detail", {}).get("jobId")
+    print(f"job_id: {job_id}")
+
+    # Pega o arquivo de input do job
+    job_input_key = event.get("detail", {}).get("outputGroupDetails", [])[0].get("outputDetails", [])[0].get("outputFilePaths", [])[0]
+    job_input_key = job_input_key.replace("s3://main-357/", "").replace("output/", "input/")
+    print(f"job_input_key: {job_input_key}")
+
+    # Pega o diretório de output do job
+    # Ele vem no formato "s3://main-357/idUsuario/numeroVideo/output/arquivo.mp4"
+    job_output = event.get("detail", {}).get("outputGroupDetails", [])[0].get("outputDetails", [])[0].get("outputFilePaths", [])[0]
+    job_output = job_output.replace("s3://main-357/", "")
+    job_output = job_output.split("output/")[0] + "output/"
+    print(f"job_output: {job_output}")
+    
+    # Lista os arquivos no diretório de output do job
     s3_client = boto3.client('s3')
-    response = s3_client.list_objects_v2(Bucket=bucket_name, Prefix=job_output_directory)
+    list_key_images = s3_client.list_objects_v2(Bucket=bucket_name, Prefix=job_output)
 
     # Armazena os endereços dos arquivos que serão compactados em um array
     files_to_compress = []
-    if 'Contents' in response:
-        for obj in response['Contents']:
+    msg_no_images = 'Não foi encontrada nenhuma imagem no diretório de saída.'
+
+    if 'Contents' in list_key_images:
+        for obj in list_key_images['Contents']:
             file_key = obj['Key']
             if not file_key.endswith('.mp4'): # Ignora arquivos mp4
                 files_to_compress.append(file_key)
-    
-    # Se não houver arquivos no array, encerra
+    else:
+        print(msg_no_images)
+
+    # Se não houver arquivos no array, retorna
     if not files_to_compress:
-        print("Nenhum arquivo a ser compactado.")
         return {
             'statusCode': 200,
-            'body': json.dumps("Nenhum arquivo foi compactado.")
+            'body': json.dumps(msg_no_images)
         }
     
     # Cria o arquivo ZIP em memória
     zip_buffer = BytesIO()
     with zipfile.ZipFile(zip_buffer, 'w') as zip_file:
         for file_key in files_to_compress:
+
             # Faz o download do arquivo para memória
             file_obj = s3_client.get_object(Bucket=bucket_name, Key=file_key)
             file_data = file_obj['Body'].read()
@@ -46,16 +63,20 @@ def lambda_handler(event, context):
     # Reseta o cursor do buffer
     zip_buffer.seek(0)
 
-    # Fazer o upload do arquivo ZIP para o S3
-    zip_key = job_output_directory + "imagens.zip"
+    # Faz o upload do arquivo ZIP para o S3
+    zip_key = job_output + "imagens.zip"
     s3_client.put_object(Bucket=bucket_name, Key=zip_key, Body=zip_buffer.getvalue())
 
     zipPath = f"s3://{bucket_name}/{zip_key}"
     print(f"Arquivo ZIP enviado para: {zipPath}")
 
+    # Apaga o arquivo de input
+    print(f"Excluindo arquivo: {job_input_key}")
+    s3_client.delete_object(Bucket=bucket_name, Key=job_input_key)
+
     # Apaga todos os arquivos do diretório de output, exceto o zip
-    if 'Contents' in response:
-        for obj in response['Contents']:
+    if 'Contents' in list_key_images:
+        for obj in list_key_images['Contents']:
             file_key = obj['Key']
             if file_key != zip_key:
                 print(f"Excluindo arquivo: {file_key}")
