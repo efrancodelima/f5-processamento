@@ -12,7 +12,7 @@ public class FilterConfig {
   public FilterRegistrationBean<JwtAuthFilter> jwtAuthFilter() {
     FilterRegistrationBean<JwtAuthFilter> registrationBean = new FilterRegistrationBean<>();
     registrationBean.setFilter(new JwtAuthFilter());
-    registrationBean.addUrlPatterns("/*");
+    registrationBean.addUrlPatterns("/video/upload", "/video/listar");
     return registrationBean;
   }
 }

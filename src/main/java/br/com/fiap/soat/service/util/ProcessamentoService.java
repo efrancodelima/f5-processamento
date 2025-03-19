@@ -9,25 +9,30 @@ import br.com.fiap.soat.service.consumer.NotificacaoService;
 import br.com.fiap.soat.util.LoggerAplicacao;
 import br.com.fiap.soat.wrapper.FileWrapper;
 import java.time.LocalDateTime;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class RegistroService {
+public class ProcessamentoService {
 
   private final NotificacaoService notificacaoService;
   private final ProcessamentoRepository repository;
 
   // Construtor
   @Autowired
-  public RegistroService(ProcessamentoRepository repository,
+  public ProcessamentoService(ProcessamentoRepository repository,
       NotificacaoService notificacaoService) {
     this.repository = repository;
     this.notificacaoService = notificacaoService;
   }
 
   // Métodos públicos
-  public ProcessamentoJpa registrarInicio(FileWrapper video, UsuarioJpa usuario) {
+  public Optional<ProcessamentoJpa> getProcessamento(String jobId) {
+    return repository.findByJobId(jobId);
+  }
+
+  public ProcessamentoJpa registrarRecebimento(FileWrapper video, UsuarioJpa usuario) {
     var processamento = ProcessamentoJpa.builder()
         .nomeVideo(video.getName())
         .usuario(usuario)
@@ -38,50 +43,43 @@ public class RegistroService {
     return repository.save(processamento);
   }
 
+  public void registrarProcessamento(ProcessamentoJpa processamento, String jobId) {
+    processamento.setStatusProcessamento(StatusProcessamento.PROCESSANDO);
+    processamento.setJobId(jobId);
+    repository.save(processamento);
+  }
+
   public void registrarErro(ProcessamentoJpa processamento, String msgErro) {
     processamento.setStatusProcessamento(StatusProcessamento.ERRO);
     processamento.setMensagemErro(msgErro);
     processamento.setTimestampConclusao(LocalDateTime.now());
     repository.save(processamento);
 
-    notificarFalhaAoUsuario(processamento.getNomeVideo(), msgErro);
+    EmailDto dadosEmail = EmailDto.getEmailFalha(processamento.getNomeVideo(),
+        processamento.getUsuario().getEmail(), msgErro);
+    
+    notificarUsuario(processamento, dadosEmail);
   }
-  
+
   public void registrarConclusao(ProcessamentoJpa processamento, String linkArquivo) {
     processamento.setStatusProcessamento(StatusProcessamento.SUCESSO);
     processamento.setLinkDownload(linkArquivo);
     processamento.setTimestampConclusao(LocalDateTime.now());
     repository.save(processamento);
 
-    notificarSucessoAoUsuario(processamento.getNomeVideo(), linkArquivo);
-  }
-
-  public void registrarJob(ProcessamentoJpa processamento, String jobId) {
-    processamento.setStatusProcessamento(StatusProcessamento.PROCESSANDO);
-    processamento.setJobId(jobId);
-    repository.save(processamento);
-  }
-
-  // Métodos privados
-  private void notificarFalhaAoUsuario(String nomeArquivo, String msgErro) {
-    try {
-      var dadosEmail = EmailDto.getEmailFalha(nomeArquivo, "email@email.com.br", msgErro);
-      notificacaoService.enviarEmail(dadosEmail);
+    EmailDto dadosEmail = EmailDto.getEmailSucesso(processamento.getNomeVideo(),
+          processamento.getUsuario().getEmail(), linkArquivo);
     
-    } catch (Exception e) {
-      LoggerAplicacao.error(e.getMessage());
-      LoggerAplicacao.error(e.getStackTrace().toString());
-    }
+    notificarUsuario(processamento, dadosEmail);
   }
 
-  private void notificarSucessoAoUsuario(String nomeArquivo, String linkArquivo) {
+  // Método privado
+  private void notificarUsuario(ProcessamentoJpa processamento, EmailDto dadosEmail) {
     try {
-      var dadosEmail = EmailDto.getEmailSucesso(nomeArquivo, "email@email.com.br", linkArquivo);
       notificacaoService.enviarEmail(dadosEmail);
-    
     } catch (Exception e) {
-      LoggerAplicacao.error(e.getMessage());
-      LoggerAplicacao.error(e.getStackTrace().toString());
+      LoggerAplicacao.error("Erro ao notificar o usuário: " + e.getMessage());
+      LoggerAplicacao.error(processamento.toString());
     }
   }
 }

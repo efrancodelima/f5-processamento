@@ -28,7 +28,7 @@ public class UploadVideoService {
   }
 
   // Métodos públicos
-  public void execute(HttpServletRequest requisicao, List<MultipartFile> videos) {
+  public void processarRequisicao(HttpServletRequest requisicao, List<MultipartFile> videos) {
 
     UsuarioJpa usuario = usuarioService.getUsuario(requisicao);
 

@@ -28,7 +28,7 @@ public class ListarVideosService {
   }
 
   // Método público
-  public List<ProcessamentoDto> execute(HttpServletRequest requisicao) {
+  public List<ProcessamentoDto> processarRequisicao(HttpServletRequest requisicao) {
 
     UsuarioJpa usuario = usuarioService.getUsuario(requisicao);
 

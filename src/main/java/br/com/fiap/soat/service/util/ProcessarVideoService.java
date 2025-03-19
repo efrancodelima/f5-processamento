@@ -24,13 +24,13 @@ public class ProcessarVideoService {
   // Atributos
   private static final String TEMP_DIR = "/tmp/";
   
-  private final RegistroService registroService;
+  private final ProcessamentoService registroService;
   private final CriarJobService extrairImagensService;
   private final AwsConfig awsConfig;
   
   // Construtor
   @Autowired
-  public ProcessarVideoService(RegistroService registroService,
+  public ProcessarVideoService(ProcessamentoService registroService,
       CriarJobService extrairImagensService, AwsConfig awsConfig) {
 
     this.registroService = registroService;
@@ -42,7 +42,7 @@ public class ProcessarVideoService {
   @Async
   public CompletableFuture<Boolean> execute(FileWrapper video, UsuarioJpa usuario) {
 
-    ProcessamentoJpa processamento = registroService.registrarInicio(video, usuario);
+    ProcessamentoJpa processamento = registroService.registrarRecebimento(video, usuario);
     
     String diretorioLocal = TEMP_DIR + UUID.randomUUID().toString() + "/";
 
@@ -61,7 +61,7 @@ public class ProcessarVideoService {
 
       String jobId = criarJob(caminhoVideoS3, diretorioOutputS3, processamento);
 
-      registroService.registrarJob(processamento, jobId);
+      registroService.registrarProcessamento(processamento, jobId);
 
       return CompletableFuture.completedFuture(true);
 

@@ -9,12 +9,14 @@ import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.mediaconvert.MediaConvertClient;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 
 @Component
 @ConfigurationProperties(prefix = "aws")
 @Data
 public class AwsConfig {
 
+  // Atributos
   private String accountId;
   private String accessKeyId;
   private String secretAccessKey;
@@ -23,6 +25,11 @@ public class AwsConfig {
   private String mediaConvertRoleArn;
   private String mediaConvertEndpoint;
   
+  // Métodos públicos
+  public Region obtainRegion() {
+    return Region.of(region.toLowerCase());
+  }
+
   public S3Client buildS3Client() {
     return S3Client.builder()
         .region(obtainRegion())
@@ -30,17 +37,21 @@ public class AwsConfig {
         .build();
   }
   
-  public Region obtainRegion() {
-    return Region.of(region.toLowerCase());
-  }
-
-  public AwsBasicCredentials createCredentials() {
-    return AwsBasicCredentials.create(accessKeyId, secretAccessKey);
+  public S3Presigner buildS3Presigner() {
+    return S3Presigner.builder()
+        .region(obtainRegion())
+        .credentialsProvider(StaticCredentialsProvider.create(createCredentials()))
+        .build();
   }
 
   public MediaConvertClient buildMediaConvertClient() {
     return MediaConvertClient.builder()
         .endpointOverride(URI.create(mediaConvertEndpoint))
         .build();
+  }
+
+  // Métodos privados
+  private AwsBasicCredentials createCredentials() {
+    return AwsBasicCredentials.create(accessKeyId, secretAccessKey);
   }
 }

@@ -8,23 +8,25 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/video")
-public class ListarVideosImpl implements ListarVideos {
+public class ListarVideosController implements ListarVideos {
 
   ListarVideosService service;
 
   @Autowired
-  public ListarVideosImpl(ListarVideosService service) {
+  public ListarVideosController(ListarVideosService service) {
     this.service = service;
   }
 
   @Override
+  @GetMapping(value = "/listar")
   public ResponseEntity<Object> listarVideos(HttpServletRequest requisicao) {
-    List<ProcessamentoDto> lista = service.execute(requisicao);
+    List<ProcessamentoDto> lista = service.processarRequisicao(requisicao);
     return ResponseEntity.status(HttpStatus.OK).body(lista);
   }
 }

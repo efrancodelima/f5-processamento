@@ -38,7 +38,7 @@ public class ProcessamentoJpa implements Serializable {
   @JoinColumn(name = "usuario_id", nullable = false)
   private UsuarioJpa usuario;
 
-  @Column(name = "job_id")
+  @Column(name = "job_id", nullable = false)
   private String jobId;
 
   @Column(name = "status_processamento", nullable = false)
@@ -55,4 +55,19 @@ public class ProcessamentoJpa implements Serializable {
 
   @Column(name = "timestamp_conclusao")
   private LocalDateTime timestampConclusao;
+
+  @Override
+  public String toString() {
+    return "ProcessamentoJpa { "
+        + "numeroVideo=" + numeroVideo
+        + ", nomeVideo='" + nomeVideo + '\''
+        + ", usuario=" + (usuario != null ? usuario.toString() : "null")
+        + ", jobId='" + jobId + '\''
+        + ", statusProcessamento=" + statusProcessamento
+        + ", mensagemErro='" + mensagemErro + '\''
+        + ", linkDownload='" + linkDownload + '\''
+        + ", timestampInicio=" + timestampInicio
+        + ", timestampConclusao=" + timestampConclusao
+        + " }";
+  }
 }
