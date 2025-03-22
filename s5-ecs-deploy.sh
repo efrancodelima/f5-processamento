@@ -3,9 +3,9 @@
 # Inicia o script
 echo "Script iniciado."
 
-CLUSTER_NAME="cluster-lanchonete"
-SERVICE_NAME="producao-service"
-TASK_DEF_NAME="task-def-producao"
+CLUSTER_NAME="cluster-tc5"
+SERVICE_NAME="video-service"
+TASK_DEF_NAME="video-task-def"
 
 # Clona a task definition mais recente, removendo os campos desnecessários
 NEW_TASK_DEFINITION=$(aws ecs describe-task-definition \

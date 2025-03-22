@@ -20,7 +20,10 @@ public interface UploadVideo {
   @ApiResponses(value = {
     @ApiResponse(
         responseCode = "204",
-        description = "No Content")
+        description = "No Content"),
+    @ApiResponse(
+        responseCode = "401",
+        description = "Unauthorized")
   })
 
   ResponseEntity<Object> uploadVideo(HttpServletRequest requisicao,

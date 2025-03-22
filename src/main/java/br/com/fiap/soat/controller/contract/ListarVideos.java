@@ -23,6 +23,9 @@ public interface ListarVideos {
         content = @Content(mediaType = "application/json",
             examples = @ExampleObject(value = exemplo))
         ),
+    @ApiResponse(
+        responseCode = "401",
+        description = "Unauthorized")
   })
 
   ResponseEntity<Object> listarVideos(HttpServletRequest requisicao);
