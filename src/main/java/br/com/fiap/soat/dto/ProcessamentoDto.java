@@ -15,9 +15,11 @@ public class ProcessamentoDto {
 
   private String statusProcessamento;
 
-  private String timestampStatus;
-
   private String mensagemErro;
 
   private String linkDownload;
+
+  private String timestampInicio;
+
+  private String timestampConclusao;
 }

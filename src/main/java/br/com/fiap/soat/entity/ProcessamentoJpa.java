@@ -2,9 +2,12 @@ package br.com.fiap.soat.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -31,8 +34,12 @@ public class ProcessamentoJpa implements Serializable {
   @Column(name = "nome_video", nullable = false)
   private String nomeVideo;
 
-  @Column(name = "usuario", nullable = false)
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "usuario_id", nullable = false)
   private UsuarioJpa usuario;
+
+  @Column(name = "job_id", nullable = false)
+  private String jobId;
 
   @Column(name = "status_processamento", nullable = false)
   private StatusProcessamento statusProcessamento;
@@ -40,7 +47,7 @@ public class ProcessamentoJpa implements Serializable {
   @Column(name = "mensagem_erro")
   private String mensagemErro;
 
-  @Column(name = "link_download")
+  @Column(name = "link_download", length = 500)
   private String linkDownload;
 
   @Column(name = "timestamp_inicio", nullable = false)
@@ -48,4 +55,19 @@ public class ProcessamentoJpa implements Serializable {
 
   @Column(name = "timestamp_conclusao")
   private LocalDateTime timestampConclusao;
+
+  @Override
+  public String toString() {
+    return "ProcessamentoJpa { "
+        + "numeroVideo=" + numeroVideo
+        + ", nomeVideo='" + nomeVideo + '\''
+        + ", usuario=" + (usuario != null ? usuario.toString() : "null")
+        + ", jobId='" + jobId + '\''
+        + ", statusProcessamento=" + statusProcessamento
+        + ", mensagemErro='" + mensagemErro + '\''
+        + ", linkDownload='" + linkDownload + '\''
+        + ", timestampInicio=" + timestampInicio
+        + ", timestampConclusao=" + timestampConclusao
+        + " }";
+  }
 }

@@ -6,8 +6,8 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 
 @Tag(name = "Video")
 public interface ListarVideos {
@@ -25,9 +25,7 @@ public interface ListarVideos {
         ),
   })
 
-  @GetMapping(value = "/listar")
-  ResponseEntity<Object> listarVideos();
-
+  ResponseEntity<Object> listarVideos(HttpServletRequest requisicao);
 
   String exemplo = """
       [

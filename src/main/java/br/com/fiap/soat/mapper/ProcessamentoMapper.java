@@ -2,7 +2,6 @@ package br.com.fiap.soat.mapper;
 
 import br.com.fiap.soat.dto.ProcessamentoDto;
 import br.com.fiap.soat.entity.ProcessamentoJpa;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,15 +11,21 @@ public class ProcessamentoMapper {
 
   public static ProcessamentoDto toDto(ProcessamentoJpa proc) {
 
-    LocalDateTime timestamp = proc.getTimestampConclusao() != null 
-        ? proc.getTimestampConclusao() : proc.getTimestampInicio();
-
+    String timestampConclusao;
+    
+    if (proc.getTimestampConclusao() != null) {
+      timestampConclusao = proc.getTimestampConclusao().toString();
+    } else {
+      timestampConclusao = "";
+    }
+    
     var resposta = new ProcessamentoDto();
     resposta.setNomeArquivo(proc.getNomeVideo());
     resposta.setStatusProcessamento(proc.getStatusProcessamento().getMessage());
-    resposta.setTimestampStatus(timestamp.toString());
     resposta.setMensagemErro(proc.getMensagemErro());
     resposta.setLinkDownload(proc.getLinkDownload());
+    resposta.setTimestampInicio(proc.getTimestampInicio().toString());
+    resposta.setTimestampConclusao(timestampConclusao);
 
     return resposta;
   }

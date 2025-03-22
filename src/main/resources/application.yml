@@ -21,10 +21,17 @@ spring:
       location: /tmp
       max-file-size: 300MB
       max-request-size: 300MB
-
-pagamento:
+aws:
+  account-id: ${AWS_ACCOUNT_ID}
+  access-key-id: ${AWS_ACCESS_KEY_ID}
+  secret-access-key: ${AWS_SECRET_ACCESS_KEY}
+  region: ${AWS_REGION}
+  bucket-name: ${AWS_BUCKET_NAME}
+  media-convert-role-arn: ${AWS_MC_ROLE_ARN}
+  media-convert-endpoint: ${AWS_MC_ENDPOINT}
+notificacao:
   service:
-    url: ${URL_SERV_PAGAMENTO}
+    url: ${URL_SERV_NOTIFICACAO}
 
 # Profile para a AWS
 ---
