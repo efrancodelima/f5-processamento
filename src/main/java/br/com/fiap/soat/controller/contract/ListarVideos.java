@@ -21,13 +21,17 @@ public interface ListarVideos {
         responseCode = "200",
         description = "Ok",
         content = @Content(mediaType = "application/json",
-            examples = @ExampleObject(value = exemplo))
-        ),
+            examples = @ExampleObject(value = exemplo200))),
+    @ApiResponse(
+        responseCode = "401",
+        description = "Unauthorized",
+        content = @Content(mediaType = "application/json",
+            examples = @ExampleObject(value = exemplo401)))
   })
 
   ResponseEntity<Object> listarVideos(HttpServletRequest requisicao);
 
-  String exemplo = """
+  String exemplo200 = """
       [
         {
           "nomeVideo": "comunicado.docx",
@@ -44,5 +48,14 @@ public interface ListarVideos {
           "linkDownload": "https://nome-do-bucket.s3.amazonaws.com/nome-do-objeto?AWSAccessKeyId=EXEMPLODECHAVEDEACESSO&Expires=1672398725"
         }
       ]
+      """;
+
+  String exemplo401 = """
+      {
+        "timestamp": 1742656750241,
+        "status": 401,
+        "error": "Unauthorized",
+        "path": "/video/listar"
+      }
       """;
 }
