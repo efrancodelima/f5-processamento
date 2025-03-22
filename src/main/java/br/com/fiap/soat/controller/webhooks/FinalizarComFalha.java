@@ -23,7 +23,7 @@ public class FinalizarComFalha {
   }
 
   @Hidden
-  @GetMapping(value = "/sucesso/{jobId}/{filePath}")
+  @GetMapping(value = "/falha")
   public ResponseEntity<Void> finalizarComFalha(@RequestBody FalhaDto requisicao) {
     
     service.processarRequisicao(requisicao);

@@ -2,7 +2,6 @@ package br.com.fiap.soat.controller.implementation;
 
 import br.com.fiap.soat.controller.contract.UploadVideo;
 import br.com.fiap.soat.service.provider.UploadVideoService;
-import br.com.fiap.soat.util.LoggerAplicacao;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -31,8 +30,6 @@ public class UploadVideoController implements UploadVideo {
   @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<Object> uploadVideo(HttpServletRequest requisicao,
       @RequestParam("file") List<MultipartFile> videos) {
-
-    LoggerAplicacao.info("Upload: " + LocalDateTime.now().toString());
 
     service.processarRequisicao(requisicao, videos);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
