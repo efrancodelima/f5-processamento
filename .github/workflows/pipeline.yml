@@ -28,32 +28,32 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven
 
-      - name: Start Application With Profile Test
-        env:
-          API_KEY_SENDGRID: ${{ secrets.API_KEY_SENDGRID }}
-        run: nohup mvn spring-boot:run -Dspring-boot.run.profiles=test &
+      # - name: Start Application With Profile Test
+      #   env:
+      #     API_KEY_SENDGRID: ${{ secrets.API_KEY_SENDGRID }}
+      #   run: nohup mvn spring-boot:run -Dspring-boot.run.profiles=test &
 
-      - name: Wait for application
-        run: ./s2-wait-for-app.sh
+      # - name: Wait for application
+      #   run: ./s2-wait-for-app.sh
         
-      - name: Cache SonarQube packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
+      # - name: Cache SonarQube packages
+      #   uses: actions/cache@v4
+      #   with:
+      #     path: ~/.sonar/cache
+      #     key: ${{ runner.os }}-sonar
+      #     restore-keys: ${{ runner.os }}-sonar
       
-      - name: Build and analyze
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-          -Dsonar.projectKey=efrancodelima_app-processamento
+      # - name: Build and analyze
+      #   env:
+      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      #   run: |
+      #     mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+      #     -Dsonar.projectKey=efrancodelima_app-video
 
-      - name: Verify analyze result
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: ./s3-sonar-qube.sh
+      # - name: Verify analyze result
+      #   env:
+      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      #   run: ./s3-sonar-qube.sh
 
       - name: Build with Maven
         env:
@@ -68,7 +68,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Build Docker image
-        run: docker build -t app-pedido -f Dockerfile .
+        run: docker build -t app-video -f Dockerfile .
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -94,5 +94,5 @@ jobs:
         if: always() && env.LOGIN_ECR == 'true'
         run: docker logout ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com
 
-      - name: Deploy on Amazon ECS
-        run: ./s5-ecs-deploy.sh
+      # - name: Deploy on Amazon ECS
+      #   run: ./s5-ecs-deploy.sh

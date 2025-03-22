@@ -2,7 +2,6 @@ package br.com.fiap.soat.controller.webhooks;
 
 import br.com.fiap.soat.service.provider.FinalizarComFalhaService;
 import io.swagger.v3.oas.annotations.Hidden;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +26,7 @@ public class FinalizarComFalha {
   public ResponseEntity<Void> listarVideos(@PathVariable("jobId") String jobId,
       @PathVariable("filePath") String filePath) {
     
-    // List<ProcessamentoDto> lista = service.execute(requisicao);
+    List<ProcessamentoDto> lista = service.execute(requisicao);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
   }
 }

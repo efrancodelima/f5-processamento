@@ -4,7 +4,7 @@ Projeto realizado como atividade avaliativa do curso de **Software Architecture 
 
 Link do projeto no GitHub:
 
-- Microsserviço de PROCESSAMENTO: https://github.com/efrancodelima/pedido
+- Microsserviço de VIDEO: https://github.com/efrancodelima/pedido
 - Microsserviço de NOTIFICACAO: https://github.com/efrancodelima/pagamento
 
 Link do vídeo demonstrando o projeto em execução:

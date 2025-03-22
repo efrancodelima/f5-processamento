@@ -1,6 +1,6 @@
 #!/bin/bash
 
-COMPONENT_KEY='efrancodelima_app-processamento'
+COMPONENT_KEY='efrancodelima_app-video'
 
 get_first_sonar_metric() {
   local metric_key="$1"

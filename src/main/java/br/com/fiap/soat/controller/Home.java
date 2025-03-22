@@ -12,7 +12,7 @@ public class Home {
   @GetMapping
   @Hidden
   public String showHome() {
-    return "Hackaton Fase 5: microsserviço de PROCESSAMENTO rodando!<br><br>"
+    return "Hackaton Fase 5: microsserviço de VÍDEO rodando!<br><br>"
         + "Link para a API: <a href=\"/swagger-ui/index.html\">Swagger UI</a>";
   }
 }
