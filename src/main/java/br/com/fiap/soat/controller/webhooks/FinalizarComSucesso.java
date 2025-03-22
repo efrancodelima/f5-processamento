@@ -2,7 +2,6 @@ package br.com.fiap.soat.controller.webhooks;
 
 import br.com.fiap.soat.dto.SucessoDto;
 import br.com.fiap.soat.service.provider.FinalizarComSucessoService;
-import br.com.fiap.soat.util.LoggerAplicacao;
 import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,8 +26,6 @@ public class FinalizarComSucesso {
   @PatchMapping(value = "/sucesso")
   public ResponseEntity<Void> finalizarComSucesso(@RequestBody SucessoDto requisicao) {
 
-    LoggerAplicacao.info("Sucesso: " + requisicao.toString());
-    
     service.processarRequisicao(requisicao);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
   }
