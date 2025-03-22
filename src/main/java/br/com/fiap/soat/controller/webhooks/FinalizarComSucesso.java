@@ -25,7 +25,7 @@ public class FinalizarComSucesso {
   @Hidden
   @PatchMapping(value = "/sucesso")
   public ResponseEntity<Void> finalizarComSucesso(@RequestBody SucessoDto requisicao) {
-    
+
     service.processarRequisicao(requisicao);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
   }
