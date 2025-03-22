@@ -38,7 +38,7 @@ public class ProcessamentoJpa implements Serializable {
   @JoinColumn(name = "usuario_id", nullable = false)
   private UsuarioJpa usuario;
 
-  @Column(name = "job_id", nullable = false)
+  @Column(name = "job_id")
   private String jobId;
 
   @Column(name = "status_processamento", nullable = false)
