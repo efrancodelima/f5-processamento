@@ -42,9 +42,6 @@ public class ProcessarVideoService {
   @Async
   public CompletableFuture<Boolean> execute(FileWrapper video, UsuarioJpa usuario) {
 
-    // fakeExecution(video, usuario);
-    // return CompletableFuture.completedFuture(true);
-
     ProcessamentoJpa processamento = registroService.registrarRecebimento(video, usuario);
     
     String diretorioLocal = TEMP_DIR + UUID.randomUUID().toString() + "/";
@@ -72,28 +69,6 @@ public class ProcessarVideoService {
       registroService.registrarErro(processamento, e.getMessage());
       return CompletableFuture.completedFuture(false);
     }
-  }
-
-  private void fakeExecution(FileWrapper video, UsuarioJpa usuario) {
-
-    ProcessamentoJpa processamento = registroService.registrarRecebimento(video, usuario);
-    
-    try {
-      Thread.sleep(11000);
-    } catch (InterruptedException e) {
-      System.out.println(e.getMessage());
-    }
-
-    String jobId = "jobId";
-    registroService.registrarProcessamento(processamento, jobId);
-
-    try {
-      Thread.sleep(11000);
-    } catch (InterruptedException e) {
-      System.out.println(e.getMessage());
-    }
-
-    registroService.registrarConclusao(processamento, jobId);
   }
 
   private void verificarConteudoVideo(FileWrapper video, ProcessamentoJpa processamento)
