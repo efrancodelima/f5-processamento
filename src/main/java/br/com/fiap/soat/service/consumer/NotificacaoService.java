@@ -3,6 +3,7 @@ package br.com.fiap.soat.service.consumer;
 import br.com.fiap.soat.dto.EmailDto;
 import br.com.fiap.soat.exception.BadGatewayException;
 import br.com.fiap.soat.exception.messages.BadGatewayMessage;
+import br.com.fiap.soat.util.LoggerAplicacao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -29,6 +30,10 @@ public class NotificacaoService {
     
     String url = baseUrl + "email/enviar/";
 
+    LoggerAplicacao.info("URL: " + url);
+    LoggerAplicacao.info("Dados do email: " + dadosEmail);
+
+
     try {
       restTemplate.exchange(
           url,
@@ -37,6 +42,7 @@ public class NotificacaoService {
           new ParameterizedTypeReference<Void>() {});
 
     } catch (Exception e) {
+      LoggerAplicacao.error(e.getMessage());
       throw new BadGatewayException(BadGatewayMessage.notificacao);
     }
   }
