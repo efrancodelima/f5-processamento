@@ -34,7 +34,7 @@ public class ProcessamentoJpa implements Serializable {
   @Column(name = "nome_video", nullable = false)
   private String nomeVideo;
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "usuario_id", nullable = false)
   private UsuarioJpa usuario;
 
