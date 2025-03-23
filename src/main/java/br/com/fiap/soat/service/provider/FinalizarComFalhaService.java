@@ -40,7 +40,7 @@ public class FinalizarComFalhaService {
     String mensagemErro = requisicao.getErrorMessage();
 
     if (requisicao.getErrorCode() == 1010) {
-      mensagemErro = "Não foi possível processar a requisição: arquivo inválido ou corrompido.";
+      mensagemErro = "Não foi possível processar a requisição: arquivo inválido.";
     }
 
     return mensagemErro;
