@@ -17,14 +17,14 @@ public class EmailDto {
 
     String assunto = "Suas imagens estão prontas!";
     String texto = "<!DOCTYPE html><html><body>"
-        + "<p>A captura de imagens do vídeo $VIDEO foi concluída com sucesso.</p>"
-        + "<p>O link para download das imagens ficará disponível por 48 horas.</p>"
+        + "<p>A captura de imagens do vídeo #VIDEO foi concluída com sucesso.</p>"
+        + "<p>O link para download das imagens ficará disponível por 24 horas.</p>"
         + "<p>Link para download: "
-        + "<a href=\"$LINK\">$LINK</a></p>"
+        + "<a href=\"#LINK\">#LINK</a></p>"
         + "</body></html>";
 
-    texto = texto.replaceAll("$LINK", linkDownload);
-    texto = texto.replaceAll("$VIDEO", nomeArquivo);
+    texto = texto.replaceAll("#LINK", linkDownload);
+    texto = texto.replaceAll("#VIDEO", nomeArquivo);
 
     return new EmailDto(emailDestino, assunto, texto);
   }
@@ -34,11 +34,11 @@ public class EmailDto {
 
     String assunto = "Seu vídeo não pode ser processado :(";
     String texto = "<!DOCTYPE html><html><body>"
-        + "<p>A captura de imagens do vídeo $VIDEO falhou.</p>"
-        + "<p>Motivo: $ERRO</p>"
+        + "<p>A captura de imagens do vídeo #VIDEO falhou.</p>"
+        + "<p>Motivo: #ERRO</p>"
         + "</body></html>";
         
-    texto = texto.replaceAll("$ERRO", msgErro);
+    texto = texto.replaceAll("#ERRO", msgErro);
 
     return new EmailDto(emailDestino, assunto, texto);
   }
