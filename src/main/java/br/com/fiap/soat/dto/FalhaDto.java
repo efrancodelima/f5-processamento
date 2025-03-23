@@ -9,5 +9,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class FalhaDto {
   private String jobId;
+  private int errorCode;
   private String errorMessage;
 }

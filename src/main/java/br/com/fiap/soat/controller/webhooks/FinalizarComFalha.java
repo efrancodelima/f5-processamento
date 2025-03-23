@@ -2,6 +2,7 @@ package br.com.fiap.soat.controller.webhooks;
 
 import br.com.fiap.soat.dto.FalhaDto;
 import br.com.fiap.soat.service.provider.FinalizarComFalhaService;
+import br.com.fiap.soat.util.LoggerAplicacao;
 import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,6 +26,8 @@ public class FinalizarComFalha {
   @Hidden
   @GetMapping(value = "/falha")
   public ResponseEntity<Void> finalizarComFalha(@RequestBody FalhaDto requisicao) {
+
+    LoggerAplicacao.info("Recebeu uma falha: " + requisicao.toString());
     
     service.processarRequisicao(requisicao);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);

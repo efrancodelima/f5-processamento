@@ -4,7 +4,6 @@ import br.com.fiap.soat.dto.FalhaDto;
 import br.com.fiap.soat.entity.ProcessamentoJpa;
 import br.com.fiap.soat.service.util.ProcessamentoService;
 import br.com.fiap.soat.util.LoggerAplicacao;
-import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -24,17 +23,26 @@ public class FinalizarComFalhaService {
   // Método público
   @Async
   public void processarRequisicao(FalhaDto requisicao) {
-
-    Optional<ProcessamentoJpa> processamentoOpt = 
-          procService.getProcessamento(requisicao.getJobId());
-    
-    if (!processamentoOpt.isPresent()) {
+    ProcessamentoJpa processamento;
+    try {
+      processamento = procService.getProcessamento(requisicao.getJobId()).get();
+    } catch (Exception e) {
       LoggerAplicacao.error("Job ID não encontrado!");
       return;
     }
 
-    ProcessamentoJpa processamento = processamentoOpt.get();
+    procService.registrarErro(processamento, getMensagemErro(requisicao));
+  }
 
-    procService.registrarErro(processamento, requisicao.getErrorMessage());
+  // Método privado
+  private String getMensagemErro(FalhaDto requisicao) {
+
+    String mensagemErro = requisicao.getErrorMessage();
+
+    if (requisicao.getErrorCode() == 1010) {
+      mensagemErro = "Não foi possível processar a requisição: arquivo inválido ou corrompido.";
+    }
+
+    return mensagemErro;
   }
 }
