@@ -1,0 +1,37 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: app-video
+  datasource:
+    url: jdbc:h2:mem:testdb
+    username: sa
+    password: password
+    driverClassName: org.h2.Driver
+  jpa:
+    show-sql: false
+    open-in-view: false
+    hibernate:
+      ddl-auto: "update"
+      dialect: "org.hibernate.dialect.MySQL8Dialect"
+  sql:
+    init:
+      schema-locations: classpath:schema-test.sql
+      data-locations: classpath:data-test.sql
+  servlet:
+    multipart:
+      enabled: true
+      location: /tmp
+      max-file-size: 300MB
+      max-request-size: 300MB
+aws:
+  account-id: AWS_ACCOUNT_ID
+  access-key-id: AWS_ACCESS_KEY_ID
+  secret-access-key: AWS_SECRET_ACCESS_KEY
+  region: AWS_REGION
+  bucket-name: AWS_BUCKET_NAME
+  media-convert-role-arn: AWS_MC_ROLE_ARN
+  media-convert-endpoint: AWS_MC_ENDPOINT
+notificacao:
+  service:
+    url: URL_SERV_NOTIFICACAO
