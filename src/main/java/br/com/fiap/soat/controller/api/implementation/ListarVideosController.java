@@ -1,6 +1,6 @@
-package br.com.fiap.soat.controller.implementation;
+package br.com.fiap.soat.controller.api.implementation;
 
-import br.com.fiap.soat.controller.contract.ListarVideos;
+import br.com.fiap.soat.controller.api.contract.ListarVideos;
 import br.com.fiap.soat.dto.ProcessamentoDto;
 import br.com.fiap.soat.service.provider.ListarVideosService;
 import jakarta.servlet.http.HttpServletRequest;

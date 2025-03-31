@@ -1,6 +1,6 @@
-package br.com.fiap.soat.controller.implementation;
+package br.com.fiap.soat.controller.api.implementation;
 
-import br.com.fiap.soat.controller.contract.UploadVideo;
+import br.com.fiap.soat.controller.api.contract.UploadVideo;
 import br.com.fiap.soat.service.provider.UploadVideoService;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;

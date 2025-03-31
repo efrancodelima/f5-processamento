@@ -1,4 +1,4 @@
-package br.com.fiap.soat.controller.webhooks;
+package br.com.fiap.soat.controller.webhook;
 
 import br.com.fiap.soat.dto.FalhaDto;
 import br.com.fiap.soat.service.provider.FinalizarComFalhaService;

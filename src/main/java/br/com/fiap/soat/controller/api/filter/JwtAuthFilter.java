@@ -1,12 +1,26 @@
-package br.com.fiap.soat.controller.filter;
+package br.com.fiap.soat.controller.api.filter;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.charset.StandardCharsets;
+import java.security.PublicKey;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.util.Base64;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import br.com.fiap.soat.constants.Constantes;
 import br.com.fiap.soat.exception.ApplicationException;
 import br.com.fiap.soat.exception.BadGatewayException;
 import br.com.fiap.soat.exception.messages.ApplicationMessage;
-import br.com.fiap.soat.exception.messages.BadGatewayMessage;
+import br.com.fiap.soat.service.consumer.GoogleCertsService;
 import br.com.fiap.soat.util.LoggerAplicacao;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import jakarta.servlet.FilterChain;
@@ -14,22 +28,16 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.security.PublicKey;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
-import java.util.Base64;
-import java.util.Map;
-import java.util.stream.Collectors;
 
+@Component
 public class JwtAuthFilter extends HttpFilter {
+
+  private final GoogleCertsService googleCerts;
+
+  @Autowired
+  public JwtAuthFilter(GoogleCertsService googleCerts) {
+    this.googleCerts = googleCerts;
+  }
   
   @Override
   protected void doFilter(HttpServletRequest request, HttpServletResponse response,
@@ -123,7 +131,8 @@ public class JwtAuthFilter extends HttpFilter {
       throws ApplicationException, BadGatewayException, MalformedURLException {
     
     X509Certificate certificado;
-    Map<String, String> certificados = getGoogleCertificates();
+    Map<String, String> certificados = googleCerts.getGoogleCertificates();
+    LoggerAplicacao.error(certificados.toString());
 
     // Seleciona o certificado correspondente ao kid
     String certificadoPem = certificados.get(kid);
@@ -150,25 +159,6 @@ public class JwtAuthFilter extends HttpFilter {
     }
 
     return certificado.getPublicKey();
-  }
-
-  private Map<String, String> getGoogleCertificates()
-      throws BadGatewayException, MalformedURLException {
-
-    URL urlCertificado = new URL(Constantes.URL_GOOGLE_CERTS);
-
-    try (InputStream is = urlCertificado.openStream();
-        BufferedReader reader = new BufferedReader(
-            new InputStreamReader(is, StandardCharsets.UTF_8))) {
-
-      String jsonResponse = reader.lines().collect(Collectors.joining());
-      
-      ObjectMapper objectMapper = new ObjectMapper();
-      return objectMapper.readValue(jsonResponse, Map.class);
-
-    } catch (Exception e) {
-      throw new BadGatewayException(BadGatewayMessage.googleCerts);
-    }
   }
 
   private Claims getTokenClaims(String token, PublicKey publicKey) {

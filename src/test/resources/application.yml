@@ -4,26 +4,32 @@ spring:
   application:
     name: app-video
   datasource:
-    url: jdbc:h2:mem:testdb
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
     username: sa
     password: password
     driverClassName: org.h2.Driver
+    initialization-mode: always
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema-test.sql
+      # data-locations: classpath:data-test.sql
   jpa:
     show-sql: false
     open-in-view: false
     hibernate:
-      ddl-auto: "update"
-      dialect: "org.hibernate.dialect.MySQL8Dialect"
-  sql:
-    init:
-      schema-locations: classpath:schema-test.sql
-      data-locations: classpath:data-test.sql
+      ddl-auto: create-drop
+      dialect: org.hibernate.dialect.H2Dialect
   servlet:
     multipart:
       enabled: true
       location: /tmp
       max-file-size: 300MB
       max-request-size: 300MB
+logging:
+  level:
+    org.springframework.jdbc: DEBUG
+    org.hibernate.tool.hbm2ddl: DEBUG
 aws:
   account-id: AWS_ACCOUNT_ID
   access-key-id: AWS_ACCESS_KEY_ID
