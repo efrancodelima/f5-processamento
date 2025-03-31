@@ -1,4 +1,4 @@
-package br.com.fiap.soat.controller.api.webhook;
+package br.com.fiap.soat.controller.webhook;
 
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
@@ -21,16 +21,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import br.com.fiap.soat.controller.api.filter.JwtAuthFilter;
 import br.com.fiap.soat.controller.api.filter.JwtAuthFilterMock;
-import br.com.fiap.soat.controller.webhook.SucessoController;
-import br.com.fiap.soat.dto.SucessoDto;
-import br.com.fiap.soat.service.provider.FinalizarComSucessoService;
+import br.com.fiap.soat.dto.FalhaDto;
+import br.com.fiap.soat.service.provider.FinalizarComFalhaService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-@WebMvcTest(SucessoController.class)
-@ContextConfiguration(classes = { SucessoController.class, FinalizarComSucessoService.class })
-public class SucessoControllerTest {
+@WebMvcTest(FalhaController.class)
+@ContextConfiguration(classes = { FalhaController.class, FinalizarComFalhaService.class })
+class FalhaControllerTest {
 
   @Autowired
   private MockMvc mockMvc;
@@ -39,18 +38,18 @@ public class SucessoControllerTest {
   private JwtAuthFilter authFilter;
 
   @MockitoBean
-  private FinalizarComSucessoService sucessoService;
+  private FinalizarComFalhaService falhaService;
 
   @BeforeEach
   void setup() throws Exception {
     MockitoAnnotations.openMocks(this);
     mockAuthFilter();
-    mockSucessoService();
+    mockFalhaService();
   }
 
   @Test
   public void testShowHome() throws Exception {
-    this.mockMvc.perform(patch("/video/sucesso")
+    this.mockMvc.perform(patch("/video/falha")
           .contentType(MediaType.APPLICATION_JSON)
           .content(getRequestContent()))
         .andExpect(status().isNoContent());
@@ -58,7 +57,7 @@ public class SucessoControllerTest {
 
   // Métodos privados
   private String getRequestContent() throws JsonProcessingException {
-    SucessoDto requisicao = new SucessoDto("jobId", "filePath");
+    FalhaDto requisicao = new FalhaDto("jobId", 1010, "errorMessage");
     return (new ObjectMapper()).writeValueAsString(requisicao);
   }
 
@@ -73,7 +72,7 @@ public class SucessoControllerTest {
     }).when(authFilter).doFilter(Mockito.any(), Mockito.any(), Mockito.any());
   }
 
-  private void mockSucessoService() {
-    doReturn(null).when(sucessoService).processarRequisicao(Mockito.any());
+  private void mockFalhaService() {
+    doReturn(null).when(falhaService).processarRequisicao(Mockito.any());
   }
 }
