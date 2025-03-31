@@ -1,4 +1,4 @@
-package br.com.fiap.soat.controller.api.filter;
+package br.com.fiap.soat.service.consumer;
 
 import java.util.HashMap;
 import java.util.Map;
