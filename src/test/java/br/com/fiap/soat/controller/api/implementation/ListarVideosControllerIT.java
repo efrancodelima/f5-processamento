@@ -51,7 +51,6 @@ class ListarVideosControllerIT {
   void deveListarOsVideosDoUsuario() throws Exception {
     // Act
     Response response = given()
-        .contentType("application/json")
         .header("Authorization", "Bearer token")
         .when()
           .get(endpoint)

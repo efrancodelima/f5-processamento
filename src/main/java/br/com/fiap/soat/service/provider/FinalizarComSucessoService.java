@@ -7,6 +7,8 @@ import br.com.fiap.soat.service.util.ProcessamentoService;
 import br.com.fiap.soat.util.LoggerAplicacao;
 import java.time.Duration;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -32,14 +34,14 @@ public class FinalizarComSucessoService {
 
   // Método público
   @Async
-  public void processarRequisicao(SucessoDto requisicao) {
+  public CompletableFuture<Void> processarRequisicao(SucessoDto requisicao) {
 
     Optional<ProcessamentoJpa> processamentoOpt = 
           procService.getProcessamento(requisicao.getJobId());
     
     if (!processamentoOpt.isPresent()) {
       LoggerAplicacao.error("Job ID não encontrado: " + requisicao.getJobId());
-      return;
+      return CompletableFuture.completedFuture(null);
     }
 
     ProcessamentoJpa processamento = processamentoOpt.get();
@@ -49,10 +51,11 @@ public class FinalizarComSucessoService {
       linkDownload = gerarLinkParaDownload(requisicao.getFilePath());
     } catch (Exception e) {
       procService.registrarErro(processamento, e.getMessage());
-      return;
+      return CompletableFuture.completedFuture(null);
     }
 
     procService.registrarConclusao(processamento, linkDownload);
+    return CompletableFuture.completedFuture(null);
   }
 
   // Método privado

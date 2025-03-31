@@ -1,7 +1,7 @@
 package br.com.fiap.soat.controller.webhook;
 
-import br.com.fiap.soat.dto.SucessoDto;
-import br.com.fiap.soat.service.provider.FinalizarComSucessoService;
+import br.com.fiap.soat.dto.FalhaDto;
+import br.com.fiap.soat.service.provider.FinalizarComFalhaService;
 import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -13,18 +13,18 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/video")
-public class FinalizarComSucesso {
+public class FalhaController {
 
-  FinalizarComSucessoService service;
+  FinalizarComFalhaService service;
 
   @Autowired
-  public FinalizarComSucesso(FinalizarComSucessoService service) {
+  public FalhaController(FinalizarComFalhaService service) {
     this.service = service;
   }
 
   @Hidden
-  @PatchMapping(value = "/sucesso")
-  public ResponseEntity<Void> finalizarComSucesso(@RequestBody SucessoDto requisicao) {
+  @PatchMapping(value = "/falha")
+  public ResponseEntity<Void> finalizarComFalha(@RequestBody FalhaDto requisicao) {
 
     service.processarRequisicao(requisicao);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
