@@ -1,5 +1,6 @@
 package br.com.fiap.soat.service.util;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -33,37 +34,37 @@ import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 
 class ProcessarVideoServiceTest {
   
-  private AutoCloseable closeable;
+  AutoCloseable closeable;
 
   @Mock
-  private ProcessamentoService processamentoService;
+  ProcessamentoService procService;
 
   @Mock
-  private AwsConfig awsConfig;
+  AwsConfig awsConfig;
 
   @Mock
-  private S3Client s3Client;
+  S3Client s3Client;
 
   @Mock
-  private CriarJobService criarJobService;
+  CriarJobService criarJobService;
 
   @Mock
-  private ProcessamentoJpa processamento;
+  ProcessamentoJpa processamento;
   
   @Mock
-  private FileWrapper video;
+  FileWrapper video;
   
   @Mock
-  private UsuarioJpa usuario;
+  UsuarioJpa usuario;
 
   @Mock
-  private PutObjectResponse putObjectResponse;
+  PutObjectResponse putObjectResponse;
 
   @Mock
-  private CreateJobResponse createJobResponse;
+  CreateJobResponse createJobResponse;
 
   @Mock
-  private Job job;
+  Job job;
   
   @InjectMocks
   ProcessarVideoService processarVideoService;
@@ -84,7 +85,7 @@ class ProcessarVideoServiceTest {
     // Arrange
     doReturn(1L).when(processamento).getNumeroVideo();
 
-    doReturn(processamento).when(processamentoService).registrarRecebimento(video, usuario);
+    doReturn(processamento).when(procService).registrarRecebimento(video, usuario);
 
     doReturn("video-content".getBytes()).when(video).getContent();
 
@@ -100,11 +101,12 @@ class ProcessarVideoServiceTest {
     
     // Act
     CompletableFuture<Boolean> resultFuture = processarVideoService.processar(video, usuario);
-    boolean result = resultFuture.join();
+    Boolean result = resultFuture.join();
 
     // Assert
+    assertNotNull(result);
     assertEquals(true, result);
-    verify(processamentoService).registrarProcessamento(processamento, jobId);
+    verify(procService).registrarProcessamento(processamento, jobId);
   }
 
   @Test
@@ -113,7 +115,7 @@ class ProcessarVideoServiceTest {
     // Arrange
     doReturn(1L).when(processamento).getNumeroVideo();
 
-    doReturn(processamento).when(processamentoService).registrarRecebimento(video, usuario);
+    doReturn(processamento).when(procService).registrarRecebimento(video, usuario);
 
     String nomeVideo = "video-01.mp4";
     doReturn(nomeVideo).when(video).getName();
@@ -130,11 +132,12 @@ class ProcessarVideoServiceTest {
     
     // Act
     CompletableFuture<Boolean> resultFuture = processarVideoService.processar(video, usuario);
-    boolean result = resultFuture.join();
+    Boolean result = resultFuture.join();
 
     // Assert
+    assertNotNull(result);
     assertEquals(false, result);
-    verify(processamentoService)
+    verify(procService)
         .registrarErro(processamento, ApplicationMessage.lerArquivo.getMessage()
           + video.getName() + ".");
   }
@@ -151,7 +154,7 @@ class ProcessarVideoServiceTest {
 
       doReturn(1L).when(processamento).getNumeroVideo();
 
-      doReturn(processamento).when(processamentoService).registrarRecebimento(video, usuario);
+      doReturn(processamento).when(procService).registrarRecebimento(video, usuario);
 
       doReturn("video-content".getBytes()).when(video).getContent();
 
@@ -160,11 +163,12 @@ class ProcessarVideoServiceTest {
       doReturn("job-id").when(job).id();
       
       CompletableFuture<Boolean> resultFuture = processarVideoService.processar(video, usuario);
-      boolean result = resultFuture.join();
+      Boolean result = resultFuture.join();
 
       // Assert
+      assertNotNull(result);
       assertEquals(false, result);     
-      verify(processamentoService)
+      verify(procService)
           .registrarErro(processamento, ApplicationMessage.salvarVideo.getMessage());
     }
   }
@@ -175,7 +179,7 @@ class ProcessarVideoServiceTest {
     // Arrange
     doReturn(1L).when(processamento).getNumeroVideo();
 
-    doReturn(processamento).when(processamentoService).registrarRecebimento(video, usuario);
+    doReturn(processamento).when(procService).registrarRecebimento(video, usuario);
 
     doReturn("video-content".getBytes()).when(video).getContent();
 
@@ -187,11 +191,12 @@ class ProcessarVideoServiceTest {
     doReturn("job-id").when(job).id();
     
     CompletableFuture<Boolean> resultFuture = processarVideoService.processar(video, usuario);
-    boolean result = resultFuture.join();
+    Boolean result = resultFuture.join();
 
     // Assert
+    assertNotNull(result);
     assertEquals(false, result);
-    verify(processamentoService)
+    verify(procService)
         .registrarErro(processamento, ApplicationMessage.enviarS3.getMessage());
   }
 
@@ -201,7 +206,7 @@ class ProcessarVideoServiceTest {
     // Arrange
     doReturn(1L).when(processamento).getNumeroVideo();
 
-    doReturn(processamento).when(processamentoService).registrarRecebimento(video, usuario);
+    doReturn(processamento).when(procService).registrarRecebimento(video, usuario);
 
     doReturn("video-content".getBytes()).when(video).getContent();
 
@@ -216,11 +221,12 @@ class ProcessarVideoServiceTest {
     doReturn("job-id").when(job).id();
     
     CompletableFuture<Boolean> resultFuture = processarVideoService.processar(video, usuario);
-    boolean result = resultFuture.join();
+    Boolean result = resultFuture.join();
 
     // Assert
+    assertNotNull(result);
     assertEquals(false, result);
-    verify(processamentoService)
+    verify(procService)
         .registrarErro(processamento, ApplicationMessage.criarJob.getMessage());
   }
 }

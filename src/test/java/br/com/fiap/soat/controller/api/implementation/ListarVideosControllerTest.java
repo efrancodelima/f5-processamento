@@ -84,6 +84,6 @@ class ListarVideosControllerTest {
   private void mockListarService() {
     List<ProcessamentoDto> lista = new ArrayList<>();
     lista.add(new ProcessamentoDto());
-    doReturn(lista).when(listarService).processarRequisicao(Mockito.any());
+    doReturn(lista).when(listarService).listar(Mockito.any());
   }
 }

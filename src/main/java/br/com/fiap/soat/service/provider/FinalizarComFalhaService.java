@@ -25,7 +25,7 @@ public class FinalizarComFalhaService {
   
   // Método público
   @Async
-  public CompletableFuture<Void> processarRequisicao(FalhaDto requisicao) {
+  public CompletableFuture<Void> finalizar(FalhaDto requisicao) {
     ProcessamentoJpa processamento;
     try {
       processamento = procService.getProcessamento(requisicao.getJobId()).get();

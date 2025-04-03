@@ -73,6 +73,6 @@ public class SucessoControllerTest {
   }
 
   private void mockSucessoService() {
-    doReturn(null).when(sucessoService).processarRequisicao(Mockito.any());
+    doReturn(null).when(sucessoService).finalizar(Mockito.any());
   }
 }

@@ -75,6 +75,6 @@ class UploadVideoControllerTest {
   }
 
   private void mockUploadService() {
-    doNothing().when(uploadService).processarRequisicao(Mockito.any(), Mockito.any());
+    doNothing().when(uploadService).receberUpload(Mockito.any(), Mockito.any());
   }
 }

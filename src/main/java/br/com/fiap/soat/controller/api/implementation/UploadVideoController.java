@@ -30,7 +30,7 @@ public class UploadVideoController implements UploadVideo {
   public ResponseEntity<Object> uploadVideo(HttpServletRequest requisicao,
       @RequestParam("file") List<MultipartFile> videos) {
 
-    service.processarRequisicao(requisicao, videos);
+    service.receberUpload(requisicao, videos);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
   }
 }

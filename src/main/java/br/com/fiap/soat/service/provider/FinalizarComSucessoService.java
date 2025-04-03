@@ -3,6 +3,8 @@ package br.com.fiap.soat.service.provider;
 import br.com.fiap.soat.config.AwsConfig;
 import br.com.fiap.soat.dto.SucessoDto;
 import br.com.fiap.soat.entity.ProcessamentoJpa;
+import br.com.fiap.soat.exception.ApplicationException;
+import br.com.fiap.soat.exception.messages.ApplicationMessage;
 import br.com.fiap.soat.service.util.ProcessamentoService;
 import br.com.fiap.soat.util.LoggerAplicacao;
 import java.time.Duration;
@@ -37,14 +39,14 @@ public class FinalizarComSucessoService {
 
   // Método público
   @Async
-  public CompletableFuture<Void> processarRequisicao(SucessoDto requisicao) {
+  public CompletableFuture<Boolean> finalizar(SucessoDto requisicao) {
 
     Optional<ProcessamentoJpa> processamentoOpt = 
           procService.getProcessamento(requisicao.getJobId());
     
     if (!processamentoOpt.isPresent()) {
       LoggerAplicacao.error("Job ID não encontrado: " + requisicao.getJobId());
-      return CompletableFuture.completedFuture(null);
+      return CompletableFuture.completedFuture(false);
     }
 
     ProcessamentoJpa processamento = processamentoOpt.get();
@@ -54,16 +56,16 @@ public class FinalizarComSucessoService {
       linkDownload = gerarLinkParaDownload(requisicao.getFilePath());
     } catch (Exception e) {
       procService.registrarErro(processamento, e.getMessage());
-      return CompletableFuture.completedFuture(null);
+      return CompletableFuture.completedFuture(false);
     }
 
     procService.registrarConclusao(processamento, linkDownload);
-    return CompletableFuture.completedFuture(null);
+    return CompletableFuture.completedFuture(true);
   }
 
   // Método privado
   private String gerarLinkParaDownload(String objectKey)
-      throws Exception {
+      throws ApplicationException {
     
     try {
       // Cria a requisição
@@ -77,8 +79,7 @@ public class FinalizarComSucessoService {
       return presignedRequest.url().toString();
     
     } catch (RuntimeException e) {
-      String mensagem = "Ocorreu um erro ao gerar o link para download das imagens.";
-      throw new Exception(mensagem);
+      throw new ApplicationException(ApplicationMessage.gerarLink);
     
     } finally {
       s3presigner.close();  

@@ -26,7 +26,7 @@ public class FalhaController {
   @PatchMapping(value = "/falha")
   public ResponseEntity<Void> finalizarComFalha(@RequestBody FalhaDto requisicao) {
 
-    service.processarRequisicao(requisicao);
+    service.finalizar(requisicao);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
   }
 }

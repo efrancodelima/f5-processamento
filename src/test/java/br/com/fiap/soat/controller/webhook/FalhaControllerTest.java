@@ -73,6 +73,6 @@ class FalhaControllerTest {
   }
 
   private void mockFalhaService() {
-    doReturn(null).when(falhaService).processarRequisicao(Mockito.any());
+    doReturn(null).when(falhaService).finalizar(Mockito.any());
   }
 }

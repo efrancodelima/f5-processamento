@@ -27,7 +27,7 @@ public class ListarVideosController implements ListarVideos {
   @GetMapping(value = "/listar")
   public ResponseEntity<Object> listarVideos(HttpServletRequest requisicao) {
 
-    List<ProcessamentoDto> lista = service.processarRequisicao(requisicao);
+    List<ProcessamentoDto> lista = service.listar(requisicao);
     return ResponseEntity.status(HttpStatus.OK).body(lista);
   }
 }

@@ -20,18 +20,16 @@ import software.amazon.awssdk.services.mediaconvert.model.CreateJobResponse;
 
 class CriarJobServiceTest {
 
-  private AutoCloseable closeable;
-  private final String caminhoVideo = "video.mp4";
-  private final String diretorioImagens = "imagens";
+  AutoCloseable closeable;
+  
+  @Mock
+  AwsConfig awsConfig;
 
   @Mock
-  private AwsConfig awsConfig;
-
-  @Mock
-  private MediaConvertClient mediaConvertClient;
+  MediaConvertClient mediaConvertClient;
 
   @InjectMocks
-  private CriarJobService criarJobService;
+  CriarJobService criarJobService;
 
   @BeforeEach
   void setup() {
@@ -44,7 +42,7 @@ class CriarJobServiceTest {
   }
 
   @Test
-  void testCriarJobSucesso() throws Exception {
+  void deveCriarJobComSucesso() throws Exception {
 
     // Arrange
     doReturn("bucket-name").when(awsConfig).getBucketName();
@@ -54,6 +52,8 @@ class CriarJobServiceTest {
     doReturn(createJobMock).when(mediaConvertClient).createJob(any(CreateJobRequest.class));
 
     // Act
+    String caminhoVideo = "video.mp4";
+    String diretorioImagens = "imagens";
     CreateJobResponse response = criarJobService.criarJob(caminhoVideo, diretorioImagens);
 
     // Assert
