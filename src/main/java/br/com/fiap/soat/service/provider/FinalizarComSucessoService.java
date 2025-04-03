@@ -24,11 +24,14 @@ public class FinalizarComSucessoService {
 
   private final AwsConfig awsConfig;
   private final ProcessamentoService procService;
+  private final S3Presigner s3presigner;
 
   // Construtor
   @Autowired
-  public FinalizarComSucessoService(AwsConfig awsConfig, ProcessamentoService procService) {
+  public FinalizarComSucessoService(AwsConfig awsConfig, S3Presigner s3presigner,
+      ProcessamentoService procService) {
     this.awsConfig = awsConfig;
+    this.s3presigner = s3presigner;
     this.procService = procService;
   }
 
@@ -62,8 +65,6 @@ public class FinalizarComSucessoService {
   private String gerarLinkParaDownload(String objectKey)
       throws Exception {
     
-    S3Presigner presigner = awsConfig.buildS3Presigner();
-    
     try {
       // Cria a requisição
       GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
@@ -72,7 +73,7 @@ public class FinalizarComSucessoService {
           .build();
 
       // Executa a requisição e retorna
-      PresignedGetObjectRequest presignedRequest = presigner.presignGetObject(presignRequest);
+      PresignedGetObjectRequest presignedRequest = s3presigner.presignGetObject(presignRequest);
       return presignedRequest.url().toString();
     
     } catch (RuntimeException e) {
@@ -80,7 +81,7 @@ public class FinalizarComSucessoService {
       throw new Exception(mensagem);
     
     } finally {
-      presigner.close();  
+      s3presigner.close();  
     }
   }
 }

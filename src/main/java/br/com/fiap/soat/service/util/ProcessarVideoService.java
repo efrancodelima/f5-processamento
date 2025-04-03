@@ -1,18 +1,22 @@
 package br.com.fiap.soat.service.util;
 
-import br.com.fiap.soat.config.AwsConfig;
-import br.com.fiap.soat.entity.ProcessamentoJpa;
-import br.com.fiap.soat.entity.UsuarioJpa;
-import br.com.fiap.soat.service.consumer.CriarJobService;
-import br.com.fiap.soat.util.SalvarArquivo;
-import br.com.fiap.soat.wrapper.FileWrapper;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+
+import br.com.fiap.soat.config.AwsConfig;
+import br.com.fiap.soat.entity.ProcessamentoJpa;
+import br.com.fiap.soat.entity.UsuarioJpa;
+import br.com.fiap.soat.exception.ApplicationException;
+import br.com.fiap.soat.exception.messages.ApplicationMessage;
+import br.com.fiap.soat.service.consumer.CriarJobService;
+import br.com.fiap.soat.util.SalvarArquivo;
+import br.com.fiap.soat.wrapper.FileWrapper;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.mediaconvert.model.CreateJobResponse;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -24,25 +28,27 @@ public class ProcessarVideoService {
   // Atributos
   private static final String TEMP_DIR = "/tmp/";
   
-  private final ProcessamentoService registroService;
-  private final CriarJobService extrairImagensService;
+  private final ProcessamentoService processamentoService;
+  private final CriarJobService criarJobService;
   private final AwsConfig awsConfig;
+  private final S3Client s3Client;
   
   // Construtor
   @Autowired
-  public ProcessarVideoService(ProcessamentoService registroService,
-      CriarJobService extrairImagensService, AwsConfig awsConfig) {
+  public ProcessarVideoService(ProcessamentoService processamentoService,
+      CriarJobService criarJobService, AwsConfig awsConfig, S3Client s3Client) {
 
-    this.registroService = registroService;
-    this.extrairImagensService = extrairImagensService;
+    this.processamentoService = processamentoService;
+    this.criarJobService = criarJobService;
     this.awsConfig = awsConfig;
+    this.s3Client = s3Client;
   }
 
   // Método público
   @Async
-  public CompletableFuture<Boolean> execute(FileWrapper video, UsuarioJpa usuario) {
+  public CompletableFuture<Boolean> processar(FileWrapper video, UsuarioJpa usuario) {
 
-    ProcessamentoJpa processamento = registroService.registrarRecebimento(video, usuario);
+    ProcessamentoJpa processamento = processamentoService.registrarRecebimento(video, usuario);
     
     String diretorioLocal = TEMP_DIR + UUID.randomUUID().toString() + "/";
 
@@ -51,6 +57,7 @@ public class ProcessarVideoService {
     String diretorioOutputS3 = diretorioS3 + "output/";
 
     try {
+
       verificarConteudoVideo(video, processamento);
 
       File videoFile = salvarVideo(video, diretorioLocal, processamento);
@@ -61,70 +68,59 @@ public class ProcessarVideoService {
 
       String jobId = criarJob(caminhoVideoS3, diretorioOutputS3, processamento);
 
-      registroService.registrarProcessamento(processamento, jobId);
+      processamentoService.registrarProcessamento(processamento, jobId);
 
       return CompletableFuture.completedFuture(true);
 
     } catch (Exception e) {
-      registroService.registrarErro(processamento, e.getMessage());
+      processamentoService.registrarErro(processamento, e.getMessage());
       return CompletableFuture.completedFuture(false);
     }
   }
 
   private void verificarConteudoVideo(FileWrapper video, ProcessamentoJpa processamento)
-      throws Exception {
-    
+      throws ApplicationException {
     if (video.getContent() == null || video.getContent().length == 0) {
-      String mensagem = "Não foi possível ler o arquivo " + video.getName();
-      registroService.registrarErro(processamento, mensagem);
-      throw new Exception(mensagem);
+      throw new ApplicationException(ApplicationMessage.lerArquivo.getMessage()
+          + video.getName() + ".");
     }
   }
 
   private File salvarVideo(FileWrapper video, String diretorio, ProcessamentoJpa processamento)
-      throws Exception {
-    
+      throws ApplicationException {
     try {
       return SalvarArquivo.salvar(video, diretorio);
     } catch (Exception e) {
-      String mensagem = "Ocorreu um erro ao salvar o arquivo.";
-      registroService.registrarErro(processamento, mensagem);
-      throw e;
+      throw new ApplicationException(ApplicationMessage.salvarVideo);
     }
   }
 
   private void enviarVideoParaS3(String caminhoVideoS3, Path localPath,
-      ProcessamentoJpa processamento) throws Exception {
+      ProcessamentoJpa processamento) throws ApplicationException {
 
     try {
-      S3Client s3 = awsConfig.buildS3Client();
-      
       PutObjectRequest putRequest = PutObjectRequest.builder()
           .bucket(awsConfig.getBucketName())
           .key(caminhoVideoS3)
           .build();
 
-      s3.putObject(putRequest, RequestBody.fromFile(localPath));
+      s3Client.putObject(putRequest, RequestBody.fromFile(localPath));
     
     } catch (RuntimeException e) {
-      String mensagem = "Ocorreu um erro ao salvar o vídeo.";
-      
-      throw new Exception(mensagem);
+      throw new ApplicationException(ApplicationMessage.enviarS3);
     }
   }
 
   private String criarJob(String caminhoVideoS3, String diretorioImagensS3,
-      ProcessamentoJpa processamento) throws Exception {
+      ProcessamentoJpa processamento) throws ApplicationException {
     
     try {
-      CreateJobResponse response = extrairImagensService
+      CreateJobResponse response = criarJobService
           .criarJob(caminhoVideoS3, diretorioImagensS3);
       return response.job().id();
 
     } catch (Exception e) {
-      String mensagem = "Ocorreu um erro ao iniciar a extração das imagens.";
-      registroService.registrarErro(processamento, mensagem);
-      throw new Exception(mensagem);
+      throw new ApplicationException(ApplicationMessage.criarJob);
     }
   }
 }

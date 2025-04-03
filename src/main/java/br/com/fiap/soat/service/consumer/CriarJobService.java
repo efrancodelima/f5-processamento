@@ -33,11 +33,13 @@ public class CriarJobService {
   private static final int INTERVALO_CAPTURA = 15;
 
   private final AwsConfig awsConfig;
+  private final MediaConvertClient mediaConvertClient;
 
   // Construtor
   @Autowired
-  public CriarJobService(AwsConfig awsConfig) {
+  public CriarJobService(AwsConfig awsConfig, MediaConvertClient mediaConvertClient) {
     this.awsConfig = awsConfig;
+    this.mediaConvertClient = mediaConvertClient;
   }
   
   // Método público
@@ -46,8 +48,6 @@ public class CriarJobService {
 
     caminhoVideo = getCaminhoVideo(caminhoVideo);
     diretorioImagens = getDiretorioImagens(diretorioImagens);
-
-    MediaConvertClient mediaConvertClient = awsConfig.buildMediaConvertClient();
 
     try {
       CreateJobRequest createJobRequest = CreateJobRequest.builder()
@@ -68,6 +68,7 @@ public class CriarJobService {
   
   // Métodos privados
   private String getCaminhoVideo(String caminhoVideo) {
+
     return "s3://BUCKET/FILE_PATH"
         .replace("BUCKET", awsConfig.getBucketName())
         .replace("FILE_PATH", caminhoVideo);

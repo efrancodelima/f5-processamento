@@ -3,6 +3,7 @@ package br.com.fiap.soat.config;
 import java.net.URI;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
@@ -16,7 +17,6 @@ import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 @Data
 public class AwsConfig {
 
-  // Atributos
   private String accountId;
   private String accessKeyId;
   private String secretAccessKey;
@@ -25,32 +25,34 @@ public class AwsConfig {
   private String mediaConvertRoleArn;
   private String mediaConvertEndpoint;
   
-  // Métodos públicos
-  public Region obtainRegion() {
-    return Region.of(region.toLowerCase());
-  }
-
-  public S3Client buildS3Client() {
+  @Bean
+  public S3Client s3Client() {
     return S3Client.builder()
         .region(obtainRegion())
         .credentialsProvider(StaticCredentialsProvider.create(createCredentials()))
         .build();
   }
   
-  public S3Presigner buildS3Presigner() {
+  @Bean
+  public S3Presigner s3Presigner() {
     return S3Presigner.builder()
         .region(obtainRegion())
         .credentialsProvider(StaticCredentialsProvider.create(createCredentials()))
         .build();
   }
 
-  public MediaConvertClient buildMediaConvertClient() {
+  @Bean
+  public MediaConvertClient mediaConvertClient() {
     return MediaConvertClient.builder()
         .endpointOverride(URI.create(mediaConvertEndpoint))
         .build();
   }
 
   // Métodos privados
+  private Region obtainRegion() {
+    return Region.of(region.toLowerCase());
+  }
+
   private AwsBasicCredentials createCredentials() {
     return AwsBasicCredentials.create(accessKeyId, secretAccessKey);
   }

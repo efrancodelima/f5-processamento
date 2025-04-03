@@ -16,9 +16,9 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import br.com.fiap.soat.constants.Constantes;
-import br.com.fiap.soat.exception.ApplicationException;
+import br.com.fiap.soat.exception.AuthException;
 import br.com.fiap.soat.exception.BadGatewayException;
-import br.com.fiap.soat.exception.messages.ApplicationMessage;
+import br.com.fiap.soat.exception.messages.AuthMessage;
 import br.com.fiap.soat.service.consumer.GoogleCertsService;
 import br.com.fiap.soat.util.LoggerAplicacao;
 import io.jsonwebtoken.Claims;
@@ -93,12 +93,12 @@ public class JwtAuthFilter extends HttpFilter {
     }
   }
 
-  private Map<String, Object> getTokenHeader(String token) throws ApplicationException {
+  private Map<String, Object> getTokenHeader(String token) throws AuthException {
 
     String[] parts = token.split("\\.");
     
     if (parts.length < 2) {
-      throw new ApplicationException(ApplicationMessage.tokenInvalido);
+      throw new AuthException(AuthMessage.tokenInvalido);
     }
 
     String headerJson = new String(Base64.getUrlDecoder()
@@ -110,25 +110,25 @@ public class JwtAuthFilter extends HttpFilter {
       return headerMap;
 
     } catch (Exception e) {
-      throw new ApplicationException(ApplicationMessage.tokenInvalido);
+      throw new AuthException(AuthMessage.tokenInvalido);
     }
   }
 
-  private String getKeyKid(Map<String, Object> header) throws ApplicationException {
+  private String getKeyKid(Map<String, Object> header) throws AuthException {
     if (header == null) {
-      throw new ApplicationException(ApplicationMessage.cabecalhoNulo);
+      throw new AuthException(AuthMessage.cabecalhoNulo);
     }
 
     String kid = (String) header.get("kid");
     if (kid == null) {
-      throw new ApplicationException(ApplicationMessage.kidAusente);
+      throw new AuthException(AuthMessage.kidAusente);
     }
 
     return kid;
   }
   
   private PublicKey getPublicKey(String kid)
-      throws ApplicationException, BadGatewayException, MalformedURLException {
+      throws AuthException, BadGatewayException, MalformedURLException {
     
     X509Certificate certificado;
     Map<String, String> certificados = googleCerts.getGoogleCertificates();
@@ -137,7 +137,7 @@ public class JwtAuthFilter extends HttpFilter {
     // Seleciona o certificado correspondente ao kid
     String certificadoPem = certificados.get(kid);
     if (certificadoPem == null) {
-      throw new ApplicationException(ApplicationMessage.certNaoEncontrado);
+      throw new AuthException(AuthMessage.certNaoEncontrado);
     }
 
     // Remove os delimitadores PEM
@@ -155,7 +155,7 @@ public class JwtAuthFilter extends HttpFilter {
           .generateCertificate(new ByteArrayInputStream(conteudo));
     
     } catch (Exception e) {
-      throw new ApplicationException(ApplicationMessage.tokenInvalido);
+      throw new AuthException(AuthMessage.tokenInvalido);
     }
 
     return certificado.getPublicKey();
@@ -169,12 +169,12 @@ public class JwtAuthFilter extends HttpFilter {
         .getBody();
   }
 
-  private void checkTokenIssuer(Claims claims) throws ApplicationException {
+  private void checkTokenIssuer(Claims claims) throws AuthException {
     
     String emissor = (String) claims.get("iss");
     
     if (!emissor.equals(Constantes.EMISSOR_CERTIFICADO)) {
-      throw new ApplicationException(ApplicationMessage.emissorInvalido);
+      throw new AuthException(AuthMessage.emissorInvalido);
     }
   }
 }
