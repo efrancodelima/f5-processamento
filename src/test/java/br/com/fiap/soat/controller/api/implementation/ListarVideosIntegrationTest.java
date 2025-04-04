@@ -30,7 +30,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @RunWith(SpringRunner.class)
-class ListarVideosControllerIT {
+class ListarVideosIntegrationTest {
 
   String endpoint = "/video/listar";
 

@@ -1,7 +1,7 @@
 package br.com.fiap.soat.service.other;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
@@ -17,7 +17,6 @@ import org.mockito.MockitoAnnotations;
 
 import br.com.fiap.soat.entity.UsuarioJpa;
 import br.com.fiap.soat.repository.UsuarioRepository;
-import br.com.fiap.soat.service.other.UsuarioService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.impl.DefaultClaims;
 import jakarta.servlet.http.HttpServletRequest;
