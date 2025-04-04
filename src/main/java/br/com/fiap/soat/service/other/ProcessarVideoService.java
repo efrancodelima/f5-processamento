@@ -1,4 +1,4 @@
-package br.com.fiap.soat.service.util;
+package br.com.fiap.soat.service.other;
 
 import java.io.File;
 import java.nio.file.Path;

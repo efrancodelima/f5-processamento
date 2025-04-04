@@ -23,7 +23,7 @@ import br.com.fiap.soat.config.AwsConfig;
 import br.com.fiap.soat.dto.SucessoDto;
 import br.com.fiap.soat.entity.ProcessamentoJpa;
 import br.com.fiap.soat.exception.messages.ApplicationMessage;
-import br.com.fiap.soat.service.util.ProcessamentoService;
+import br.com.fiap.soat.service.other.ProcessamentoService;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
@@ -37,12 +37,9 @@ class FinalizarComSucessoServiceTest {
   
   @Mock
   ProcessamentoService procService;
-  
-  @Mock
-  S3Presigner s3presigner;
 
   @Mock
-  SucessoDto requisicao;
+  S3Presigner s3presigner;
 
   @Mock
   PresignedGetObjectRequest presignedRequest;
@@ -64,10 +61,11 @@ class FinalizarComSucessoServiceTest {
   void deveRegistrarConclusaoProcessamento() throws MalformedURLException {
     
     // Arrange
-    ProcessamentoJpa processamento = new ProcessamentoJpa();
+    String jobId = "job-id";    
+    SucessoDto requisicao = new SucessoDto();
+    requisicao.setJobId(jobId);
 
-    String jobId = "job-id";
-    doReturn(jobId).when(requisicao).getJobId();
+    ProcessamentoJpa processamento = new ProcessamentoJpa();
     doReturn(Optional.of(processamento)).when(procService).getProcessamento(jobId);
 
     doReturn("bucket-name").when(awsConfig).getBucketName();
@@ -93,7 +91,10 @@ class FinalizarComSucessoServiceTest {
 
     // Arrange
     String jobId = "job-id";
-    doReturn(jobId).when(requisicao).getJobId();
+
+    SucessoDto requisicao = new SucessoDto();
+    requisicao.setJobId(jobId);
+    
     doReturn(Optional.empty()).when(procService).getProcessamento(jobId);
 
     // Act
@@ -109,10 +110,11 @@ class FinalizarComSucessoServiceTest {
   void deveRetornarFalseQuandoS3PresignerFalhar() throws MalformedURLException {
     
     // Arrange
-    ProcessamentoJpa processamento = new ProcessamentoJpa();
-
     String jobId = "job-id";
-    doReturn(jobId).when(requisicao).getJobId();
+    SucessoDto requisicao = new SucessoDto();
+    requisicao.setJobId(jobId);
+    
+    ProcessamentoJpa processamento = new ProcessamentoJpa();
     doReturn(Optional.of(processamento)).when(procService).getProcessamento(jobId);
 
     doReturn("bucket-name").when(awsConfig).getBucketName();

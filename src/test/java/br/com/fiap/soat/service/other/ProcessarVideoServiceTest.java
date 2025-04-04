@@ -1,4 +1,4 @@
-package br.com.fiap.soat.service.util;
+package br.com.fiap.soat.service.other;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -23,6 +23,8 @@ import br.com.fiap.soat.entity.ProcessamentoJpa;
 import br.com.fiap.soat.entity.UsuarioJpa;
 import br.com.fiap.soat.exception.messages.ApplicationMessage;
 import br.com.fiap.soat.service.consumer.CriarJobService;
+import br.com.fiap.soat.service.other.ProcessamentoService;
+import br.com.fiap.soat.service.other.ProcessarVideoService;
 import br.com.fiap.soat.util.SalvarArquivo;
 import br.com.fiap.soat.wrapper.FileWrapper;
 import software.amazon.awssdk.core.sync.RequestBody;

@@ -1,4 +1,4 @@
-package br.com.fiap.soat.service.util;
+package br.com.fiap.soat.service.other;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -17,6 +17,7 @@ import org.mockito.MockitoAnnotations;
 
 import br.com.fiap.soat.entity.UsuarioJpa;
 import br.com.fiap.soat.repository.UsuarioRepository;
+import br.com.fiap.soat.service.other.UsuarioService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.impl.DefaultClaims;
 import jakarta.servlet.http.HttpServletRequest;

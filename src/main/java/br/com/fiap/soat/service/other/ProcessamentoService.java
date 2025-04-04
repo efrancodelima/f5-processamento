@@ -1,4 +1,4 @@
-package br.com.fiap.soat.service.util;
+package br.com.fiap.soat.service.other;
 
 import br.com.fiap.soat.dto.EmailDto;
 import br.com.fiap.soat.entity.ProcessamentoJpa;

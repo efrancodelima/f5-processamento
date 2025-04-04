@@ -1,4 +1,4 @@
-package br.com.fiap.soat.service.util;
+package br.com.fiap.soat.service.other;
 
 import br.com.fiap.soat.entity.UsuarioJpa;
 import br.com.fiap.soat.repository.UsuarioRepository;
