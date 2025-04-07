@@ -37,6 +37,6 @@ class JwtAuthFilterTest {
         .then()
           .extract().response();
 
-    assertEquals(HttpStatus.OK.value(), response.getStatusCode());
+    assertEquals(HttpStatus.UNAUTHORIZED.value(), response.getStatusCode());
   }
 }
