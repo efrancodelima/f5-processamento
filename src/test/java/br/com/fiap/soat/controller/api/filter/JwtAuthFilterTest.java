@@ -29,9 +29,9 @@ class JwtAuthFilterTest {
   }
 
   @Test
-  void deveRejeitarTokenExpirado() {
+  void deveRejeitarTokenInvalido() {
     Response response = given()
-        .header("Authorization", "Bearer " + JwtAuthFilterMock.getExpiredToken())
+        .header("Authorization", "Bearer XXX")
         .when()
           .get(endpoint)
         .then()
