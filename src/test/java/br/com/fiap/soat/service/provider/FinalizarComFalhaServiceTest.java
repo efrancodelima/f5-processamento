@@ -17,6 +17,7 @@ import org.mockito.MockitoAnnotations;
 
 import br.com.fiap.soat.dto.FalhaDto;
 import br.com.fiap.soat.entity.ProcessamentoJpa;
+import br.com.fiap.soat.exception.BadGatewayException;
 import br.com.fiap.soat.service.other.ProcessamentoService;
 
 class FinalizarComFalhaServiceTest {
@@ -40,7 +41,7 @@ class FinalizarComFalhaServiceTest {
   }
 
   @Test
-  void deveRegistrarFalhaProcessamento() {
+  void deveRegistrarFalhaProcessamento() throws BadGatewayException {
 
     // Arrange
     String jobId = "job-id";
@@ -64,7 +65,7 @@ class FinalizarComFalhaServiceTest {
   }
 
   @Test
-  void deveRetornarFalseSeNaoEncontrarJobId() {
+  void deveRetornarFalseSeNaoEncontrarJobId() throws BadGatewayException {
 
     // Arrange
     String jobId = "job-id";

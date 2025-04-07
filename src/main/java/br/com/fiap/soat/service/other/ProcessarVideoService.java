@@ -78,6 +78,7 @@ public class ProcessarVideoService {
     }
   }
 
+  // Métodos privados
   private void verificarConteudoVideo(FileWrapper video, ProcessamentoJpa processamento)
       throws ApplicationException {
     if (video.getContent() == null || video.getContent().length == 0) {

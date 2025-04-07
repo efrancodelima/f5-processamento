@@ -1,9 +1,9 @@
 package br.com.fiap.soat.service.consumer;
 
-import br.com.fiap.soat.config.AwsConfig;
-import br.com.fiap.soat.util.LoggerAplicacao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import br.com.fiap.soat.config.AwsConfig;
 import software.amazon.awssdk.services.mediaconvert.MediaConvertClient;
 import software.amazon.awssdk.services.mediaconvert.model.ContainerSettings;
 import software.amazon.awssdk.services.mediaconvert.model.ContainerType;
@@ -57,10 +57,6 @@ public class CriarJobService {
 
       return mediaConvertClient.createJob(createJobRequest);
 
-    } catch (Exception e) {
-      LoggerAplicacao.error(e.getMessage());
-      throw new Exception(e.getMessage());
-    
     } finally {
       mediaConvertClient.close();
     }

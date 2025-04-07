@@ -39,6 +39,7 @@ public class EmailDto {
         + "</body></html>";
         
     texto = texto.replaceAll("#ERRO", msgErro);
+    texto = texto.replaceAll("#VIDEO", nomeArquivo);
 
     return new EmailDto(emailDestino, assunto, texto);
   }

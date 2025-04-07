@@ -1,9 +1,7 @@
 package br.com.fiap.soat.controller.api.implementation;
 
-import br.com.fiap.soat.controller.api.contract.UploadVideo;
-import br.com.fiap.soat.service.provider.UploadVideoService;
-import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -13,6 +11,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
+import br.com.fiap.soat.controller.api.contract.UploadVideo;
+import br.com.fiap.soat.service.provider.UploadVideoService;
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/video")

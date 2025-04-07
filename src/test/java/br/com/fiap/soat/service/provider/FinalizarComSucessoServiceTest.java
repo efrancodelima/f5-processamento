@@ -6,7 +6,6 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -58,7 +57,7 @@ class FinalizarComSucessoServiceTest {
   }
 
   @Test
-  void deveRegistrarConclusaoProcessamento() throws MalformedURLException {
+  void deveRegistrarConclusaoProcessamento() throws Exception {
     
     // Arrange
     String jobId = "job-id";    
@@ -87,7 +86,7 @@ class FinalizarComSucessoServiceTest {
   }
 
   @Test
-  void deveRetornarFalseSeNaoEncontrarJobId() throws MalformedURLException {
+  void deveRetornarFalseSeNaoEncontrarJobId() throws Exception {
 
     // Arrange
     String jobId = "job-id";
@@ -107,7 +106,7 @@ class FinalizarComSucessoServiceTest {
   }
 
   @Test
-  void deveRetornarFalseQuandoS3PresignerFalhar() throws MalformedURLException {
+  void deveRetornarFalseQuandoS3PresignerFalhar() throws Exception {
     
     // Arrange
     String jobId = "job-id";

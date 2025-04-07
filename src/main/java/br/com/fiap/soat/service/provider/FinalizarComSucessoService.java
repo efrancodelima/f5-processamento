@@ -4,6 +4,7 @@ import br.com.fiap.soat.config.AwsConfig;
 import br.com.fiap.soat.dto.SucessoDto;
 import br.com.fiap.soat.entity.ProcessamentoJpa;
 import br.com.fiap.soat.exception.ApplicationException;
+import br.com.fiap.soat.exception.BadGatewayException;
 import br.com.fiap.soat.exception.messages.ApplicationMessage;
 import br.com.fiap.soat.service.other.ProcessamentoService;
 import br.com.fiap.soat.util.LoggerAplicacao;
@@ -39,7 +40,7 @@ public class FinalizarComSucessoService {
 
   // Método público
   @Async
-  public CompletableFuture<Boolean> finalizar(SucessoDto requisicao) {
+  public CompletableFuture<Boolean> finalizar(SucessoDto requisicao) throws BadGatewayException {
 
     Optional<ProcessamentoJpa> processamentoOpt = 
           procService.getProcessamento(requisicao.getJobId());

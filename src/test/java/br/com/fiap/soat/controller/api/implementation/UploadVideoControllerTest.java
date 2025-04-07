@@ -18,6 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import br.com.fiap.soat.controller.api.filter.JwtAuthFilter;
 import br.com.fiap.soat.controller.api.filter.JwtAuthFilterMock;
+import br.com.fiap.soat.exception.BadGatewayException;
 import br.com.fiap.soat.service.provider.UploadVideoService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
@@ -74,7 +75,7 @@ class UploadVideoControllerTest {
     }).when(authFilter).doFilter(Mockito.any(), Mockito.any(), Mockito.any());
   }
 
-  private void mockUploadService() {
+  private void mockUploadService() throws BadGatewayException {
     doNothing().when(uploadService).receberUpload(Mockito.any(), Mockito.any());
   }
 }

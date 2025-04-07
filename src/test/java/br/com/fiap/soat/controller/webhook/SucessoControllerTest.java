@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import br.com.fiap.soat.controller.api.filter.JwtAuthFilter;
 import br.com.fiap.soat.controller.api.filter.JwtAuthFilterMock;
 import br.com.fiap.soat.dto.SucessoDto;
+import br.com.fiap.soat.exception.BadGatewayException;
 import br.com.fiap.soat.service.provider.FinalizarComSucessoService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
@@ -72,7 +73,7 @@ public class SucessoControllerTest {
     }).when(authFilter).doFilter(Mockito.any(), Mockito.any(), Mockito.any());
   }
 
-  private void mockSucessoService() {
+  private void mockSucessoService() throws BadGatewayException {
     doReturn(null).when(sucessoService).finalizar(Mockito.any());
   }
 }

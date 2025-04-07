@@ -69,7 +69,7 @@ public class ProcessamentoService {
 
     EmailDto dadosEmail = EmailDto.getEmailSucesso(processamento.getNomeVideo(),
           processamento.getUsuario().getEmail(), linkArquivo);
-    
+
     notificarUsuario(processamento, dadosEmail);
   }
 

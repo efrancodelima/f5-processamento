@@ -1,6 +1,7 @@
 package br.com.fiap.soat.controller.webhook;
 
 import br.com.fiap.soat.dto.SucessoDto;
+import br.com.fiap.soat.exception.BadGatewayException;
 import br.com.fiap.soat.service.provider.FinalizarComSucessoService;
 import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +25,8 @@ public class SucessoController {
 
   @Hidden
   @PatchMapping(value = "/sucesso")
-  public ResponseEntity<Void> finalizarComSucesso(@RequestBody SucessoDto requisicao) {
+  public ResponseEntity<Void> finalizarComSucesso(@RequestBody SucessoDto requisicao)
+      throws BadGatewayException {
 
     service.finalizar(requisicao);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);

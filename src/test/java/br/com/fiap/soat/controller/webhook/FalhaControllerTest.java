@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import br.com.fiap.soat.controller.api.filter.JwtAuthFilter;
 import br.com.fiap.soat.controller.api.filter.JwtAuthFilterMock;
 import br.com.fiap.soat.dto.FalhaDto;
+import br.com.fiap.soat.exception.BadGatewayException;
 import br.com.fiap.soat.service.provider.FinalizarComFalhaService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
@@ -72,7 +73,7 @@ class FalhaControllerTest {
     }).when(authFilter).doFilter(Mockito.any(), Mockito.any(), Mockito.any());
   }
 
-  private void mockFalhaService() {
+  private void mockFalhaService() throws BadGatewayException {
     doReturn(null).when(falhaService).finalizar(Mockito.any());
   }
 }

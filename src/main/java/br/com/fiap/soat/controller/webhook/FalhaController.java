@@ -1,6 +1,7 @@
 package br.com.fiap.soat.controller.webhook;
 
 import br.com.fiap.soat.dto.FalhaDto;
+import br.com.fiap.soat.exception.BadGatewayException;
 import br.com.fiap.soat.service.provider.FinalizarComFalhaService;
 import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +25,8 @@ public class FalhaController {
 
   @Hidden
   @PatchMapping(value = "/falha")
-  public ResponseEntity<Void> finalizarComFalha(@RequestBody FalhaDto requisicao) {
+  public ResponseEntity<Void> finalizarComFalha(@RequestBody FalhaDto requisicao)
+      throws BadGatewayException {
 
     service.finalizar(requisicao);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);

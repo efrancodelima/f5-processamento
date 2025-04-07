@@ -31,13 +31,13 @@ logging:
     org.springframework.jdbc: DEBUG
     org.hibernate.tool.hbm2ddl: DEBUG
 aws:
-  account-id: AWS_ACCOUNT_ID
-  access-key-id: AWS_ACCESS_KEY_ID
-  secret-access-key: AWS_SECRET_ACCESS_KEY
-  region: AWS_REGION
-  bucket-name: AWS_BUCKET_NAME
-  media-convert-role-arn: AWS_MC_ROLE_ARN
-  media-convert-endpoint: AWS_MC_ENDPOINT
+  account-id: account-id
+  access-key-id: access-key-id
+  secret-access-key: secret-access-key
+  region: us-east-1
+  bucket-name: bucket-name
+  media-convert-role-arn: media-convert-role-arn
+  media-convert-endpoint: https://example.com
 notificacao:
   service:
-    url: URL_SERV_NOTIFICACAO
+    url: url-servico-notificacao

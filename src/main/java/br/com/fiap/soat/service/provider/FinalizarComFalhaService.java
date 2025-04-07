@@ -2,6 +2,7 @@ package br.com.fiap.soat.service.provider;
 
 import br.com.fiap.soat.dto.FalhaDto;
 import br.com.fiap.soat.entity.ProcessamentoJpa;
+import br.com.fiap.soat.exception.BadGatewayException;
 import br.com.fiap.soat.service.other.ProcessamentoService;
 import br.com.fiap.soat.util.LoggerAplicacao;
 
@@ -25,7 +26,7 @@ public class FinalizarComFalhaService {
   
   // Método público
   @Async
-  public CompletableFuture<Boolean> finalizar(FalhaDto requisicao) {
+  public CompletableFuture<Boolean> finalizar(FalhaDto requisicao) throws BadGatewayException {
     ProcessamentoJpa processamento;
     try {
       processamento = procService.getProcessamento(requisicao.getJobId()).get();
