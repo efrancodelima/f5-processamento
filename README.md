@@ -182,7 +182,7 @@ O banco de dados escolhido para a aplicação foi o Aurora, um banco de dados re
 
 ### 3.1 Modelo lógico
 
-![Modelo lógico](assets/erd.png)
+![Modelo lógico](assets/erd.svg)
 
 É um modelo que visa armazenar somente as informações necessárias para a proposta atual. Conforme o sistema for crescendo, talvez seja interessante guardar mais dados do usuário (para fins de cobrança, por exemplo), ter uma entidade só para o vídeo, outra para o histórico do processamento (guardando o registro de cada mudança de status), etc. Mas, no momento, o modelo atual atende o que foi pedido.
 
