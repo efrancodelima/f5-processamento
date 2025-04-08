@@ -19,7 +19,6 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
 import br.com.fiap.soat.entity.UsuarioJpa;
-import br.com.fiap.soat.exception.BadGatewayException;
 import br.com.fiap.soat.service.other.ProcessarVideoService;
 import br.com.fiap.soat.service.other.UsuarioService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -51,7 +50,7 @@ class UploadVideoServiceTest {
   }
 
   @Test
-  void deveRemoverNulosEncaminharOsVideosParaProcessar() throws BadGatewayException {
+  void deveRemoverNulosEncaminharOsVideosParaProcessar() {
 
     // Arrange
     var videos = getVideos();

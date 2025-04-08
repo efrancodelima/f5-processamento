@@ -1,6 +1,8 @@
 package br.com.fiap.soat.constants;
 
 public class Constantes {
+
+  private Constantes() {}
   
   public static final String EMISSOR_CERTIFICADO = "https://securetoken.google.com/soat-fase-5";
 

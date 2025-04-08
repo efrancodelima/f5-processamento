@@ -128,6 +128,6 @@ class FinalizarComSucessoServiceTest {
     // Assert
     assertNotNull(result);
     assertEquals(false, result);
-    verify(procService).registrarErro(processamento, ApplicationMessage.gerarLink.getMessage());
+    verify(procService).registrarErro(processamento, ApplicationMessage.GERAR_LINK.getMessage());
   }
 }

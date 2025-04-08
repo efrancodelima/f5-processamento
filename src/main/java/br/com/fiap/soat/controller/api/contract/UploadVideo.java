@@ -29,13 +29,13 @@ public interface UploadVideo {
         responseCode = "401",
         description = "Unauthorized",
         content = @Content(mediaType = "application/json",
-            examples = @ExampleObject(value = exemplo401)))
+            examples = @ExampleObject(value = EXEMPLO_401)))
   })
 
   ResponseEntity<Object> uploadVideo(HttpServletRequest requisicao,
       @RequestParam("file") List<MultipartFile> video);
 
-  String exemplo401 = """
+  String EXEMPLO_401 = """
       {
         "timestamp": 1742656750241,
         "status": 401,

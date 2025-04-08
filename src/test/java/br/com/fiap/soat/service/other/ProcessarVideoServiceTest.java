@@ -138,12 +138,12 @@ class ProcessarVideoServiceTest {
     assertNotNull(result);
     assertEquals(false, result);
     verify(procService)
-        .registrarErro(processamento, ApplicationMessage.lerArquivo.getMessage()
+        .registrarErro(processamento, ApplicationMessage.LER_ARQUIVO.getMessage()
           + video.getName() + ".");
   }
 
   @Test
-  void deveRegistrarErroQuandoSalvarVideoFalhar() throws Exception {
+  void deveRegistrarErroQuandoSalvarVideoFalhar() {
 
     try (MockedStatic<SalvarArquivo> salvarArquivoMock = Mockito.mockStatic(SalvarArquivo.class)) {
       
@@ -169,7 +169,7 @@ class ProcessarVideoServiceTest {
       assertNotNull(result);
       assertEquals(false, result);     
       verify(procService)
-          .registrarErro(processamento, ApplicationMessage.salvarVideo.getMessage());
+          .registrarErro(processamento, ApplicationMessage.SALVAR_VIDEO.getMessage());
     }
   }
 
@@ -197,7 +197,7 @@ class ProcessarVideoServiceTest {
     assertNotNull(result);
     assertEquals(false, result);
     verify(procService)
-        .registrarErro(processamento, ApplicationMessage.enviarS3.getMessage());
+        .registrarErro(processamento, ApplicationMessage.ENVIAR_S3.getMessage());
   }
 
   @Test
@@ -227,6 +227,6 @@ class ProcessarVideoServiceTest {
     assertNotNull(result);
     assertEquals(false, result);
     verify(procService)
-        .registrarErro(processamento, ApplicationMessage.criarJob.getMessage());
+        .registrarErro(processamento, ApplicationMessage.CRIAR_JOB.getMessage());
   }
 }

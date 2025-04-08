@@ -80,7 +80,7 @@ public class FinalizarComSucessoService {
       return presignedRequest.url().toString();
     
     } catch (RuntimeException e) {
-      throw new ApplicationException(ApplicationMessage.gerarLink);
+      throw new ApplicationException(ApplicationMessage.GERAR_LINK);
     
     } finally {
       s3presigner.close();  

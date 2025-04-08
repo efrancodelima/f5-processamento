@@ -91,7 +91,7 @@ class NotificacaoServiceTest {
   }
 
   @Test
-  void deveLancarExcecao() throws BadGatewayException {
+  void deveLancarExcecao() {
     // Arrange
     EmailDto dadosEmail = new EmailDto();
     

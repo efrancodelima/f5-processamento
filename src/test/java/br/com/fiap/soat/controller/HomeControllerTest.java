@@ -13,13 +13,13 @@ import org.springframework.test.web.servlet.MvcResult;
 
 @WebMvcTest(HomeController.class)
 @ContextConfiguration(classes = {HomeController.class})
-public class HomeControllerTest {
+class HomeControllerTest {
 
   @Autowired
   private MockMvc mockMvc;
 
   @Test
-  public void testShowHome() throws Exception {
+  void testShowHome() throws Exception {
 
     MvcResult mvcResult = this.mockMvc.perform(get("/")).andReturn();
 

@@ -1,6 +1,8 @@
 package br.com.fiap.soat.service.other;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -15,6 +17,7 @@ import br.com.fiap.soat.entity.UsuarioJpa;
 import br.com.fiap.soat.exception.ApplicationException;
 import br.com.fiap.soat.exception.messages.ApplicationMessage;
 import br.com.fiap.soat.service.consumer.CriarJobService;
+import br.com.fiap.soat.util.LoggerAplicacao;
 import br.com.fiap.soat.util.SalvarArquivo;
 import br.com.fiap.soat.wrapper.FileWrapper;
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -58,15 +61,15 @@ public class ProcessarVideoService {
 
     try {
 
-      verificarConteudoVideo(video, processamento);
+      verificarConteudoVideo(video);
 
-      File videoFile = salvarVideo(video, diretorioLocal, processamento);
+      File videoFile = salvarVideo(video, diretorioLocal);
 
-      enviarVideoParaS3(caminhoVideoS3, videoFile.toPath(), processamento);
+      enviarVideoParaS3(caminhoVideoS3, videoFile.toPath());
 
-      videoFile.delete();
-
-      String jobId = criarJob(caminhoVideoS3, diretorioOutputS3, processamento);
+      apagarArquivo(videoFile);
+      
+      String jobId = criarJob(caminhoVideoS3, diretorioOutputS3);
 
       processamentoService.registrarProcessamento(processamento, jobId);
 
@@ -79,26 +82,23 @@ public class ProcessarVideoService {
   }
 
   // Métodos privados
-  private void verificarConteudoVideo(FileWrapper video, ProcessamentoJpa processamento)
-      throws ApplicationException {
+  private void verificarConteudoVideo(FileWrapper video) throws ApplicationException {
     if (video.getContent() == null || video.getContent().length == 0) {
-      throw new ApplicationException(ApplicationMessage.lerArquivo.getMessage()
+      throw new ApplicationException(ApplicationMessage.LER_ARQUIVO.getMessage()
           + video.getName() + ".");
     }
   }
 
-  private File salvarVideo(FileWrapper video, String diretorio, ProcessamentoJpa processamento)
-      throws ApplicationException {
+  private File salvarVideo(FileWrapper video, String diretorio) throws ApplicationException {
     try {
       return SalvarArquivo.salvar(video, diretorio);
     } catch (Exception e) {
-      throw new ApplicationException(ApplicationMessage.salvarVideo);
+      throw new ApplicationException(ApplicationMessage.SALVAR_VIDEO);
     }
   }
 
-  private void enviarVideoParaS3(String caminhoVideoS3, Path localPath,
-      ProcessamentoJpa processamento) throws ApplicationException {
-
+  private void enviarVideoParaS3(String caminhoVideoS3, Path localPath)
+      throws ApplicationException {
     try {
       PutObjectRequest putRequest = PutObjectRequest.builder()
           .bucket(awsConfig.getBucketName())
@@ -108,20 +108,28 @@ public class ProcessarVideoService {
       s3Client.putObject(putRequest, RequestBody.fromFile(localPath));
     
     } catch (RuntimeException e) {
-      throw new ApplicationException(ApplicationMessage.enviarS3);
+      throw new ApplicationException(ApplicationMessage.ENVIAR_S3);
     }
   }
 
-  private String criarJob(String caminhoVideoS3, String diretorioImagensS3,
-      ProcessamentoJpa processamento) throws ApplicationException {
-    
+  private void apagarArquivo(File arquivo) {
+    Path path = arquivo.toPath();
+    try {
+      Files.delete(path);
+    } catch (IOException e) {
+      LoggerAplicacao.info("Não foi possível remover o arquivo: " + arquivo.getAbsolutePath());
+    }
+  }
+
+  private String criarJob(String caminhoVideoS3, String diretorioImagensS3)
+      throws ApplicationException {
     try {
       CreateJobResponse response = criarJobService
           .criarJob(caminhoVideoS3, diretorioImagensS3);
       return response.job().id();
 
     } catch (Exception e) {
-      throw new ApplicationException(ApplicationMessage.criarJob);
+      throw new ApplicationException(ApplicationMessage.CRIAR_JOB);
     }
   }
 }

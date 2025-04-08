@@ -23,8 +23,8 @@ public class EmailDto {
         + "<a href=\"#LINK\">#LINK</a></p>"
         + "</body></html>";
 
-    texto = texto.replaceAll("#LINK", linkDownload);
-    texto = texto.replaceAll("#VIDEO", nomeArquivo);
+    texto = texto.replace("#LINK", linkDownload).replace("#LINK", linkDownload);
+    texto = texto.replace("#VIDEO", nomeArquivo);
 
     return new EmailDto(emailDestino, assunto, texto);
   }
@@ -38,8 +38,8 @@ public class EmailDto {
         + "<p>Motivo: #ERRO</p>"
         + "</body></html>";
         
-    texto = texto.replaceAll("#ERRO", msgErro);
-    texto = texto.replaceAll("#VIDEO", nomeArquivo);
+    texto = texto.replace("#ERRO", msgErro);
+    texto = texto.replace("#VIDEO", nomeArquivo);
 
     return new EmailDto(emailDestino, assunto, texto);
   }

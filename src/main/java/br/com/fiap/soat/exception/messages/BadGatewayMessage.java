@@ -2,8 +2,8 @@ package br.com.fiap.soat.exception.messages;
 
 public enum BadGatewayMessage {
     
-  notificacao("Erro na comunicação com o microsserviço de notificação."),
-  googleCerts("Erro na comunicação com o serviço de certificados do Google.");
+  NOTIFICACAO("Erro na comunicação com o microsserviço de notificação."),
+  GOOGLE_CERTS("Erro na comunicação com o serviço de certificados do Google.");
 
   private String mensagem;
 

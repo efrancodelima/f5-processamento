@@ -35,7 +35,7 @@ public class GoogleCertsService {
       return objectMapper.readValue(jsonResponse, Map.class);
 
     } catch (Exception e) {
-      throw new BadGatewayException(BadGatewayMessage.googleCerts);
+      throw new BadGatewayException(BadGatewayMessage.GOOGLE_CERTS);
     }
   }
 }

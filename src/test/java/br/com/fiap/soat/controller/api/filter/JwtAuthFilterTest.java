@@ -24,7 +24,7 @@ class JwtAuthFilterTest {
   private int port;
 
   @BeforeEach
-  void setup() throws Exception {
+  void setup() {
     RestAssured.port = port;
   }
 

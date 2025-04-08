@@ -49,7 +49,7 @@ class FalhaControllerTest {
   }
 
   @Test
-  public void testShowHome() throws Exception {
+  void testShowHome() throws Exception {
     this.mockMvc.perform(patch("/video/falha")
           .contentType(MediaType.APPLICATION_JSON)
           .content(getRequestContent()))

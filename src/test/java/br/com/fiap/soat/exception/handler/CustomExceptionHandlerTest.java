@@ -45,7 +45,7 @@ class CustomExceptionHandlerTest {
   @Test
   void deveTratarBadGatewayException() {
     // Arrange
-    var excecao = new BadGatewayException(BadGatewayMessage.googleCerts);
+    var excecao = new BadGatewayException(BadGatewayMessage.GOOGLE_CERTS);
     String path = "/video/upload";
     doReturn("URI=" + path).when(request).getDescription(Mockito.anyBoolean());
 
@@ -59,7 +59,7 @@ class CustomExceptionHandlerTest {
     CustomErrorResponse errorResponse = resposta.getBody();
 
     assertEquals(HttpStatus.BAD_GATEWAY.getReasonPhrase(), errorResponse.getError());
-    assertEquals(BadGatewayMessage.googleCerts.getMessage(), errorResponse.getMessage());
+    assertEquals(BadGatewayMessage.GOOGLE_CERTS.getMessage(), errorResponse.getMessage());
     assertNotNull(errorResponse.getTimestamp());
     assertEquals(path, errorResponse.getPath());
   }
@@ -67,7 +67,7 @@ class CustomExceptionHandlerTest {
   @Test
   void deveTratarApplicationException() {
     // Arrange
-    var excecao = new ApplicationException(ApplicationMessage.criarJob);
+    var excecao = new ApplicationException(ApplicationMessage.CRIAR_JOB);
     String path = "/video/upload";
     doReturn("URI=" + path).when(request).getDescription(Mockito.anyBoolean());
 
@@ -81,7 +81,7 @@ class CustomExceptionHandlerTest {
     CustomErrorResponse errorResponse = resposta.getBody();
 
     assertEquals(HttpStatus.UNPROCESSABLE_ENTITY.getReasonPhrase(), errorResponse.getError());
-    assertEquals(ApplicationMessage.criarJob.getMessage(), errorResponse.getMessage());
+    assertEquals(ApplicationMessage.CRIAR_JOB.getMessage(), errorResponse.getMessage());
     assertNotNull(errorResponse.getTimestamp());
     assertEquals(path, errorResponse.getPath());
   }
@@ -89,7 +89,7 @@ class CustomExceptionHandlerTest {
   @Test
   void deveTratarAuthException() {
     // Arrange
-    var excecao = new AuthException(AuthMessage.tokenInvalido);
+    var excecao = new AuthException(AuthMessage.TOKEN_INVALIDO);
     String path = "/video/upload";
     doReturn("URI=" + path).when(request).getDescription(Mockito.anyBoolean());
 
@@ -103,7 +103,7 @@ class CustomExceptionHandlerTest {
     CustomErrorResponse errorResponse = resposta.getBody();
 
     assertEquals(HttpStatus.UNAUTHORIZED.getReasonPhrase(), errorResponse.getError());
-    assertEquals(AuthMessage.tokenInvalido.getMessage(), errorResponse.getMessage());
+    assertEquals(AuthMessage.TOKEN_INVALIDO.getMessage(), errorResponse.getMessage());
     assertNotNull(errorResponse.getTimestamp());
     assertEquals(path, errorResponse.getPath());
   }

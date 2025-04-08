@@ -45,6 +45,8 @@ public class AwsConfig {
   public MediaConvertClient mediaConvertClient() {
     return MediaConvertClient.builder()
         .endpointOverride(URI.create(mediaConvertEndpoint))
+        .region(obtainRegion())
+        .credentialsProvider(StaticCredentialsProvider.create(createCredentials()))
         .build();
   }
 

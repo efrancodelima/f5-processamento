@@ -2,11 +2,11 @@ package br.com.fiap.soat.exception.messages;
 
 public enum AuthMessage {
   
-  tokenInvalido("Token inválido."),
-  cabecalhoNulo("Token inválido (cabeçalho nulo)."),
-  kidAusente("Token inválido (kid ausente)."),
-  certNaoEncontrado("Token inválido (certificado não encontrado)."),
-  emissorInvalido("Token inválido (emissor inválido).");
+  TOKEN_INVALIDO("Token inválido."),
+  CABECALHO_NULO("Token inválido (cabeçalho nulo)."),
+  KID_AUSENTE("Token inválido (kid ausente)."),
+  CERT_NOT_FOUND("Token inválido (certificado não encontrado)."),
+  EMISSOR_INVALIDO("Token inválido (emissor inválido).");
 
   private String mensagem;
 

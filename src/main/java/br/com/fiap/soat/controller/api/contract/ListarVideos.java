@@ -21,17 +21,17 @@ public interface ListarVideos {
         responseCode = "200",
         description = "Ok",
         content = @Content(mediaType = "application/json",
-            examples = @ExampleObject(value = exemplo200))),
+            examples = @ExampleObject(value = EXEMPLO_200))),
     @ApiResponse(
         responseCode = "401",
         description = "Unauthorized",
         content = @Content(mediaType = "application/json",
-            examples = @ExampleObject(value = exemplo401)))
+            examples = @ExampleObject(value = EXEMPLO_401)))
   })
 
   ResponseEntity<Object> listarVideos(HttpServletRequest requisicao);
 
-  String exemplo200 = """
+  String EXEMPLO_200 = """
       [
         {
           "nomeVideo": "comunicado.docx",
@@ -50,7 +50,7 @@ public interface ListarVideos {
       ]
       """;
 
-  String exemplo401 = """
+  String EXEMPLO_401 = """
       {
         "timestamp": 1742656750241,
         "status": 401,

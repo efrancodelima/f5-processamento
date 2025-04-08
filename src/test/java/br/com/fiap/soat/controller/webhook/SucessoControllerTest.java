@@ -30,7 +30,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @WebMvcTest(SucessoController.class)
 @ContextConfiguration(classes = { SucessoController.class, FinalizarComSucessoService.class })
-public class SucessoControllerTest {
+class SucessoControllerTest {
 
   @Autowired
   private MockMvc mockMvc;
@@ -49,7 +49,7 @@ public class SucessoControllerTest {
   }
 
   @Test
-  public void testShowHome() throws Exception {
+  void testShowHome() throws Exception {
     this.mockMvc.perform(patch("/video/sucesso")
           .contentType(MediaType.APPLICATION_JSON)
           .content(getRequestContent()))

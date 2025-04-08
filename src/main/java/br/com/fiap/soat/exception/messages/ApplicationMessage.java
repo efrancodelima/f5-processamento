@@ -2,11 +2,11 @@ package br.com.fiap.soat.exception.messages;
 
 public enum ApplicationMessage {
   
-  lerArquivo("Ocorreu um erro ao ler o arquivo "),
-  salvarVideo("Ocorreu um erro ao salvar o vídeo."),
-  enviarS3("Ocorreu um erro ao enviar o vídeo para o S3."),
-  criarJob("Ocorreu um erro ao criar o job no MediaConvert."),
-  gerarLink("Ocorreu um erro ao gerar o link para download das imagens.");
+  LER_ARQUIVO("Ocorreu um erro ao ler o arquivo "),
+  SALVAR_VIDEO("Ocorreu um erro ao salvar o vídeo."),
+  ENVIAR_S3("Ocorreu um erro ao enviar o vídeo para o S3."),
+  CRIAR_JOB("Ocorreu um erro ao criar o job no MediaConvert."),
+  GERAR_LINK("Ocorreu um erro ao gerar o link para download das imagens.");
 
   private String mensagem;
 

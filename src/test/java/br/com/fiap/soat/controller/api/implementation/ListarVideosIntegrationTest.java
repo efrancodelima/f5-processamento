@@ -48,7 +48,7 @@ class ListarVideosIntegrationTest {
 
   @Test
   @Sql(scripts = "/user-1-data.sql")
-  void deveListarOsVideosDoUsuario() throws Exception {
+  void deveListarOsVideosDoUsuario() {
     // Act
     Response response = given()
         .header("Authorization", "Bearer token")

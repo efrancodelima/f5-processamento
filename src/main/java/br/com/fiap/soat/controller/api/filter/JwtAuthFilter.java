@@ -32,7 +32,7 @@ import jakarta.servlet.http.HttpServletResponse;
 @Component
 public class JwtAuthFilter extends HttpFilter {
 
-  private final GoogleCertsService googleCerts;
+  private final transient GoogleCertsService googleCerts;
 
   @Autowired
   public JwtAuthFilter(GoogleCertsService googleCerts) {
@@ -98,7 +98,7 @@ public class JwtAuthFilter extends HttpFilter {
     String[] parts = token.split("\\.");
     
     if (parts.length < 2) {
-      throw new AuthException(AuthMessage.tokenInvalido);
+      throw new AuthException(AuthMessage.TOKEN_INVALIDO);
     }
 
     String headerJson = new String(Base64.getUrlDecoder()
@@ -106,22 +106,21 @@ public class JwtAuthFilter extends HttpFilter {
     
     try {
       ObjectMapper objectMapper = new ObjectMapper();
-      Map<String, Object> headerMap = objectMapper.readValue(headerJson, Map.class);
-      return headerMap;
+      return objectMapper.readValue(headerJson, Map.class);
 
     } catch (Exception e) {
-      throw new AuthException(AuthMessage.tokenInvalido);
+      throw new AuthException(AuthMessage.TOKEN_INVALIDO);
     }
   }
 
   private String getKeyKid(Map<String, Object> header) throws AuthException {
     if (header == null) {
-      throw new AuthException(AuthMessage.cabecalhoNulo);
+      throw new AuthException(AuthMessage.CABECALHO_NULO);
     }
 
     String kid = (String) header.get("kid");
     if (kid == null) {
-      throw new AuthException(AuthMessage.kidAusente);
+      throw new AuthException(AuthMessage.KID_AUSENTE);
     }
 
     return kid;
@@ -137,7 +136,7 @@ public class JwtAuthFilter extends HttpFilter {
     // Seleciona o certificado correspondente ao kid
     String certificadoPem = certificados.get(kid);
     if (certificadoPem == null) {
-      throw new AuthException(AuthMessage.certNaoEncontrado);
+      throw new AuthException(AuthMessage.CERT_NOT_FOUND);
     }
 
     // Remove os delimitadores PEM
@@ -155,7 +154,7 @@ public class JwtAuthFilter extends HttpFilter {
           .generateCertificate(new ByteArrayInputStream(conteudo));
     
     } catch (Exception e) {
-      throw new AuthException(AuthMessage.tokenInvalido);
+      throw new AuthException(AuthMessage.TOKEN_INVALIDO);
     }
 
     return certificado.getPublicKey();
@@ -174,7 +173,7 @@ public class JwtAuthFilter extends HttpFilter {
     String emissor = (String) claims.get("iss");
     
     if (!emissor.equals(Constantes.EMISSOR_CERTIFICADO)) {
-      throw new AuthException(AuthMessage.emissorInvalido);
+      throw new AuthException(AuthMessage.EMISSOR_INVALIDO);
     }
   }
 }

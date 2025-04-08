@@ -52,7 +52,7 @@ class ListarVideosControllerTest {
   }
 
   @Test
-  public void testShowHome() throws Exception {
+  void testShowHome() throws Exception {
 
     MvcResult mvcResult = this.mockMvc
         .perform(
