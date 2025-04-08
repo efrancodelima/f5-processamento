@@ -169,6 +169,8 @@ A pipeline segue o padrão dos projetos anteriores: ela valida a qualidade do c�
 Links para o job completo da pipeline:
 - Microsserviço de vídeo: https://github.com/efrancodelima/f5-processamento/actions/runs/14322269037/job/40141338166
 - Microsserviço de notificação: https://github.com/efrancodelima/f5-notificacao/actions/runs/14320065155/job/40135129961
+- Lambda de sucesso: https://github.com/efrancodelima/f5-lambda-sucesso/actions/runs/14020601602/job/39252034654
+- Lambda de falha:  https://github.com/efrancodelima/f5-lambda-falha/actions/runs/14020589569/job/39252008176
 
 ## 3 Banco de dados
 
