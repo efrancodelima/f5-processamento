@@ -18,17 +18,19 @@ Link do vídeo demonstrando o projeto em execução:
 
 - [Objetivos](#1-objetivos)
 - [Requisitos](#2-requisitos)
-  - [Processamento assíncrono](#21-processamento-assincrono)
-  - [Banco de dados](#22-banco-de-dados)
-  - [Testes](#23-testes)
-  - [Pipeline](#24-pipeline)
-  - [API Web](#25-api-web)
-- [Evidências dos testes](#3-evidências-dos-testes)
-- [Comentários sobre o projeto](#4-comentários-sobre-o-projeto)
-  - [Microsserviços](#41-microsserviços)
-  - [Banco de dados](#42-banco-de-dados)
-  - [Testes](#43-testes)
-  - [Pipeline](#44-pipeline)
+  - [Processamento assíncrono](#21-processamento-assíncrono)
+  - [Balanceamento de carga](#22-balanceamento-de-carga)
+  - [Autenticação](#23-autenticação)
+  - [Listagem dos vídeos](#24-listagem-dos-vídeos)
+  - [Notificações](#25-notificações)
+  - [Persistência dos dados](#26-persistência-dos-dados)
+  - [Escalabilidade](#27-escalabilidade)
+  - [Repositórios](#28-repositórios)
+  - [Qualidade do software](#29-qualidade-do-software)
+  - [Pipeline](#210-pipeline)
+- [Banco de dados](#3-banco-de-dados)
+  - [Modelo lógico](#31-modelo-lógico)
+  - [Script SQL](#32-acript-sql)
 - [Instrução para rodar a aplicação](#5-instrução-para-rodar-a-aplicação)
 
 ## 1. Objetivos
@@ -88,7 +90,7 @@ Os microsserviços da aplicação rodam na rede privada da AWS, não sendo diret
 
 Esses endpoints possuem um filtro de autenticação. O filtro, na hora de validar o token JWT, considera não apenas o conteúdo do token, mas o emissor também (que é a nossa aplicação cadastrada no Firebase). Isso corrobora na segurança do sistema.
 
-### 2.4 Listar os status dos vídeos
+### 2.4 Listagem dos vídeos
 
 "O fluxo deve ter uma listagem de status dos vídeos de um usuário."
 
@@ -178,13 +180,13 @@ Links para o job completo da pipeline:
 
 O banco de dados escolhido para a aplicação foi o Aurora, um banco de dados relacional da AWS.
 
-### 4.1 Modelo lógico
+### 3.1 Modelo lógico
 
 ![Modelo lógico](assets/erd.png)
 
 É um modelo que visa armazenar somente as informações necessárias para a proposta atual. Conforme o sistema for crescendo, talvez seja interessante guardar mais dados do usuário (para fins de cobrança, por exemplo), ter uma entidade só para o vídeo, outra para o histórico do processamento (guardando o registro de cada mudança de status), etc. Mas, no momento, o modelo atual atende o que foi pedido.
 
-### 4.2 Script de criação
+### 3.2 Script SQL
 
 O script SQL do esquema do banco de dados segue abaixo:
 
