@@ -227,7 +227,7 @@ A lambda de sucesso irá acessar o S3 para ler e gravar dados, pois é ela quem 
 
 A aplicação irá então gerar o link presigned e enviar um e-mail para o usuário com o link para download das imagens compactadas. Esse link presigned é um link com prazo de validade gerado pela AWS que permite compartilhar arquivos do S3 com outras pessoas.
 
-A lambda de falha aciona o webhook da aplicação para comunicar a falha. A aplicação registra o motivo da falha no database e envia um e-mail informando o usuário.
+A lambda de falha aciona o webhook da aplicação (sempre passando pelo load balancer) para comunicar a falha. A aplicação registra o motivo da falha no database e envia um e-mail informando o usuário.
 
 Um ponto importante no trabalho das lambdas é que a comunicação delas com a aplicação é assíncrona. Considerando que as lambdas são cobradas por tempo de execução, a aplicação responde com um 204 assim que o webhook é acionado.
 
