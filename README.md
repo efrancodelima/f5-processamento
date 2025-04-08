@@ -178,9 +178,11 @@ O banco de dados escolhido para a aplicação foi o Aurora, um banco de dados re
 
 ### 3.1 Modelo lógico
 
-![Modelo lógico](assets/erd.png)
+O diagrama abaixo foi feito usando a ferramenta Quick Database Diagrams. O sinal de interrogação nos tipos dos campos indicam que o campo pode ser nulo. As chaves indicam chave primária (maior) e chave única (menor). A chave estrangeira é indicada pelo relacionamento.
 
-É um modelo que visa armazenar somente as informações necessárias para a proposta atual. Conforme o sistema for crescendo, talvez seja interessante guardar mais dados do usuário (para fins de cobrança, por exemplo), ter uma entidade só para o vídeo, outra para o histórico do processamento (guardando o registro de cada mudança de status), etc. Mas, no momento, o modelo acima atende o que foi pedido.
+O modelo construído visa armazenar somente as informações necessárias para a proposta atual. Conforme o sistema for crescendo, talvez seja interessante guardar mais dados do usuário, ter uma entidade só para o vídeo, outra para pagamento, outra para o histórico do processamento (guardando o registro de cada mudança de status), etc. Mas, no momento, o modelo porposto atende o que foi pedido.
+
+![Modelo lógico](assets/erd.png)
 
 ### 3.2 Script SQL
 
