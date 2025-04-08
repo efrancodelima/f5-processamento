@@ -4,8 +4,8 @@ Projeto realizado como atividade avaliativa do curso de **Software Architecture 
 
 Link do projeto no GitHub:
 
-- Microsserviço de VIDEO: https://github.com/efrancodelima/f5-processamento
-- Microsserviço de NOTIFICACAO: https://github.com/efrancodelima/f5-notificacao
+- Microsserviço de vídeo: https://github.com/efrancodelima/f5-processamento
+- Microsserviço de notificação: https://github.com/efrancodelima/f5-notificacao
 - Lambda AWS de sucesso: https://github.com/efrancodelima/f5-lambda-sucesso
 - Lambda AWS de falha: https://github.com/efrancodelima/f5-lambda-falha
 - Projeto front-end: https://github.com/efrancodelima/f5-estatico
@@ -166,7 +166,7 @@ Abaixo segue a evidência dos testes:
 A pipeline segue o padrão dos projetos anteriores: ela valida a qualidade do código (conforme descrito no item anterior) e, se a qualidade estiver ok, faz o build da imagem docker, faz o push no ECR e o deploy no ECS. Se der qualquer erro, a pipeline é interrompida.
 
 Links para o job completo da pipeline:
-- Microsserviço de processamento: https://github.com/efrancodelima/f5-processamento/actions/runs/14322269037/job/40141338166
+- Microsserviço de vídeo: https://github.com/efrancodelima/f5-processamento/actions/runs/14322269037/job/40141338166
 - Microsserviço de notificação: https://github.com/efrancodelima/f5-notificacao/actions/runs/14320065155/job/40135129961
 
 ## 3 Banco de dados
