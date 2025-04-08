@@ -43,7 +43,7 @@ public class NotificacaoService {
           new ParameterizedTypeReference<Void>() {});
 
     } catch (Exception e) {
-      throw new BadGatewayException(BadGatewayMessage.notificacao);
+      throw new BadGatewayException(BadGatewayMessage.NOTIFICACAO);
     }
   }
 }

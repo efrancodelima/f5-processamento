@@ -1,16 +1,18 @@
 package br.com.fiap.soat.service.provider;
 
-import br.com.fiap.soat.entity.UsuarioJpa;
-import br.com.fiap.soat.service.util.ProcessarVideoService;
-import br.com.fiap.soat.service.util.UsuarioService;
-import br.com.fiap.soat.util.RemoverElementosNulos;
-import br.com.fiap.soat.wrapper.FileWrapper;
-import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import br.com.fiap.soat.entity.UsuarioJpa;
+import br.com.fiap.soat.service.other.ProcessarVideoService;
+import br.com.fiap.soat.service.other.UsuarioService;
+import br.com.fiap.soat.util.RemoverElementosNulos;
+import br.com.fiap.soat.wrapper.FileWrapper;
+import jakarta.servlet.http.HttpServletRequest;
 
 @Service
 public class UploadVideoService {
@@ -28,7 +30,7 @@ public class UploadVideoService {
   }
 
   // Métodos públicos
-  public void processarRequisicao(HttpServletRequest requisicao, List<MultipartFile> videos) {
+  public void receberUpload(HttpServletRequest requisicao, List<MultipartFile> videos) {
 
     UsuarioJpa usuario = usuarioService.getUsuario(requisicao);
 
@@ -36,7 +38,7 @@ public class UploadVideoService {
     List<FileWrapper> videosWrapper = encapsularRequisicao(videos);
 
     for (var video : videosWrapper) {
-      processarVideoService.execute(video, usuario);
+      processarVideoService.processar(video, usuario);
     }
   }
 

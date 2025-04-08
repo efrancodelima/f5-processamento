@@ -1,9 +1,9 @@
 package br.com.fiap.soat.service.consumer;
 
-import br.com.fiap.soat.config.AwsConfig;
-import br.com.fiap.soat.util.LoggerAplicacao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import br.com.fiap.soat.config.AwsConfig;
 import software.amazon.awssdk.services.mediaconvert.MediaConvertClient;
 import software.amazon.awssdk.services.mediaconvert.model.ContainerSettings;
 import software.amazon.awssdk.services.mediaconvert.model.ContainerType;
@@ -33,11 +33,13 @@ public class CriarJobService {
   private static final int INTERVALO_CAPTURA = 15;
 
   private final AwsConfig awsConfig;
+  private final MediaConvertClient mediaConvertClient;
 
   // Construtor
   @Autowired
-  public CriarJobService(AwsConfig awsConfig) {
+  public CriarJobService(AwsConfig awsConfig, MediaConvertClient mediaConvertClient) {
     this.awsConfig = awsConfig;
+    this.mediaConvertClient = mediaConvertClient;
   }
   
   // Método público
@@ -47,8 +49,6 @@ public class CriarJobService {
     caminhoVideo = getCaminhoVideo(caminhoVideo);
     diretorioImagens = getDiretorioImagens(diretorioImagens);
 
-    MediaConvertClient mediaConvertClient = awsConfig.buildMediaConvertClient();
-
     try {
       CreateJobRequest createJobRequest = CreateJobRequest.builder()
           .role(awsConfig.getMediaConvertRoleArn())
@@ -57,10 +57,6 @@ public class CriarJobService {
 
       return mediaConvertClient.createJob(createJobRequest);
 
-    } catch (Exception e) {
-      LoggerAplicacao.error(e.getMessage());
-      throw new Exception(e.getMessage());
-    
     } finally {
       mediaConvertClient.close();
     }
@@ -68,6 +64,7 @@ public class CriarJobService {
   
   // Métodos privados
   private String getCaminhoVideo(String caminhoVideo) {
+
     return "s3://BUCKET/FILE_PATH"
         .replace("BUCKET", awsConfig.getBucketName())
         .replace("FILE_PATH", caminhoVideo);
@@ -95,46 +92,83 @@ public class CriarJobService {
   private OutputGroup buildOutputGroup(String diretorioSaida) {
     return OutputGroup.builder()
       .name("File Group")
-      .outputGroupSettings(OutputGroupSettings.builder()
-        .type(OutputGroupType.FILE_GROUP_SETTINGS)
-        .fileGroupSettings(FileGroupSettings.builder()
-          .destination(diretorioSaida)
-          .build())
-        .build())
-      .outputs(
-
-        // Output do vídeo
-        Output.builder()
-          .containerSettings(ContainerSettings.builder()
-            .container(ContainerType.MP4)
-            .build())
-          .videoDescription(VideoDescription.builder()
-            .codecSettings(VideoCodecSettings.builder()
-              .codec(VideoCodec.H_264)
-                .h264Settings(H264Settings.builder()
-                  .rateControlMode(H264RateControlMode.CBR)
-                  .bitrate(500 * 1000)
-                .build())
-              .build())
-            .build())
-          .build(),
-        
-        // Output das imagens
-        Output.builder()
-          .containerSettings(ContainerSettings.builder()
-            .container(ContainerType.RAW)
-            .build())
-          .videoDescription(VideoDescription.builder()
-            .codecSettings(VideoCodecSettings.builder()
-              .codec(VideoCodec.FRAME_CAPTURE)
-              .frameCaptureSettings(FrameCaptureSettings.builder()
-                .framerateNumerator(1)
-                .framerateDenominator(INTERVALO_CAPTURA)
-                .build())
-              .build())
-            .build())
-          .build()
-      )
+      .outputGroupSettings(buildOutputGroupSettings(diretorioSaida))
+      .outputs(buildOutputVideo(), buildOutputImages())
     .build();
+  }
+
+  private OutputGroupSettings buildOutputGroupSettings(String diretorioSaida) {
+    return OutputGroupSettings.builder()
+        .type(OutputGroupType.FILE_GROUP_SETTINGS)
+        .fileGroupSettings(buildFileGroupSettings(diretorioSaida))
+        .build();
+  }
+
+  private FileGroupSettings buildFileGroupSettings(String diretorioSaida) {
+    return FileGroupSettings.builder()
+        .destination(diretorioSaida)
+        .build();
+  }
+
+  private ContainerSettings buildContainerSettings(ContainerType tipoContainer) {
+    return ContainerSettings.builder()
+        .container(tipoContainer)
+        .build();
+  }
+
+  // Builds usados no vídeo
+  private Output buildOutputVideo() {
+    return Output.builder()
+        .containerSettings(buildContainerSettings(ContainerType.MP4))
+        .videoDescription(buildVideoDescriptionVideo())
+        .build();
+  }
+
+  private VideoDescription buildVideoDescriptionVideo() {
+    return VideoDescription.builder()
+        .codecSettings(buildVideoCodecSettingsVideo())
+        .build();
+  }
+
+  private VideoCodecSettings buildVideoCodecSettingsVideo() {
+    return VideoCodecSettings.builder()
+        .codec(VideoCodec.H_264)
+        .h264Settings(buildH264Settings())
+        .build();
+  }
+
+  private H264Settings buildH264Settings() {
+    return H264Settings.builder()
+        .rateControlMode(H264RateControlMode.CBR)
+        .bitrate(500 * 1000)
+        .build();
+  }
+
+  // Builds usados nas imagens
+  private Output buildOutputImages() {
+    return Output.builder()
+        .containerSettings(buildContainerSettings(ContainerType.RAW))
+        .videoDescription(buildVideoDescription())
+        .build();
+  }
+
+  private FrameCaptureSettings buildFrameCaptureSettings() {
+    return FrameCaptureSettings.builder()
+        .framerateNumerator(1)
+        .framerateDenominator(INTERVALO_CAPTURA)
+        .build();
+  }
+
+  private VideoCodecSettings buildVideoCodecSettingsImages() {
+    return VideoCodecSettings.builder()
+        .codec(VideoCodec.FRAME_CAPTURE)
+        .frameCaptureSettings(buildFrameCaptureSettings())
+        .build();
+  }
+
+  private VideoDescription buildVideoDescription() {
+    return VideoDescription.builder()
+        .codecSettings(buildVideoCodecSettingsImages())
+        .build();
   }
 }

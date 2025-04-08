@@ -33,25 +33,21 @@ notificacao:
   service:
     url: ${URL_SERV_NOTIFICACAO}
 
+# Profile local
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+  datasource:
+    url: jdbc:h2:mem:testdb
+    username: ${H2_USERNAME}
+    password: ${H2_PASSWORD}
+    driverClassName: org.h2.Driver
+
 # Profile para a AWS
 ---
 spring:
   config:
     activate:
       on-profile: dev
-
-# Profile para testes
----
-spring:
-  config:
-    activate:
-      on-profile: test
-  datasource:
-    url: jdbc:h2:mem:testdb
-    username: ${H2_USERNAME}
-    password: ${H2_PASSWORD}
-    driverClassName: org.h2.Driver
-  sql:
-    init:
-      schema-locations: classpath:schema-test.sql
-      data-locations: classpath:data-test.sql

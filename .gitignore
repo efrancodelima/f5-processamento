@@ -25,4 +25,4 @@ hs_err_pid*
 replay_pid*
 
 s10-run-local.sh
-s11-anotacoes.txt
+s11-run-sonar.sh

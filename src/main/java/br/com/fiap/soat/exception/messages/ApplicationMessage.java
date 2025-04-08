@@ -1,15 +1,12 @@
 package br.com.fiap.soat.exception.messages;
 
 public enum ApplicationMessage {
-    
-  erroProcessamento("Ocorreu um erro inesperado ao processar o vídeo. "
-        + "Por favor, contate o suporte técnico."),
-  tokenInvalido("Token inválido."),
-  cabecalhoNulo("Token inválido (cabeçalho nulo)."),
-  kidAusente("Token inválido (kid ausente)."),
-  certNaoEncontrado("Token inválido (certificado não encontrado)."),
-  emissorInvalido("Token inválido (emissor inválido).");
-
+  
+  LER_ARQUIVO("Ocorreu um erro ao ler o arquivo "),
+  SALVAR_VIDEO("Ocorreu um erro ao salvar o vídeo."),
+  ENVIAR_S3("Ocorreu um erro ao enviar o vídeo para o S3."),
+  CRIAR_JOB("Ocorreu um erro ao criar o job no MediaConvert."),
+  GERAR_LINK("Ocorreu um erro ao gerar o link para download das imagens.");
 
   private String mensagem;
 

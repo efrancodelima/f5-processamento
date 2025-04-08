@@ -3,10 +3,15 @@ package br.com.fiap.soat.service.provider;
 import br.com.fiap.soat.config.AwsConfig;
 import br.com.fiap.soat.dto.SucessoDto;
 import br.com.fiap.soat.entity.ProcessamentoJpa;
-import br.com.fiap.soat.service.util.ProcessamentoService;
+import br.com.fiap.soat.exception.ApplicationException;
+import br.com.fiap.soat.exception.BadGatewayException;
+import br.com.fiap.soat.exception.messages.ApplicationMessage;
+import br.com.fiap.soat.service.other.ProcessamentoService;
 import br.com.fiap.soat.util.LoggerAplicacao;
 import java.time.Duration;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -22,24 +27,27 @@ public class FinalizarComSucessoService {
 
   private final AwsConfig awsConfig;
   private final ProcessamentoService procService;
+  private final S3Presigner s3presigner;
 
   // Construtor
   @Autowired
-  public FinalizarComSucessoService(AwsConfig awsConfig, ProcessamentoService procService) {
+  public FinalizarComSucessoService(AwsConfig awsConfig, S3Presigner s3presigner,
+      ProcessamentoService procService) {
     this.awsConfig = awsConfig;
+    this.s3presigner = s3presigner;
     this.procService = procService;
   }
 
   // Método público
   @Async
-  public void processarRequisicao(SucessoDto requisicao) {
+  public CompletableFuture<Boolean> finalizar(SucessoDto requisicao) throws BadGatewayException {
 
     Optional<ProcessamentoJpa> processamentoOpt = 
           procService.getProcessamento(requisicao.getJobId());
     
     if (!processamentoOpt.isPresent()) {
       LoggerAplicacao.error("Job ID não encontrado: " + requisicao.getJobId());
-      return;
+      return CompletableFuture.completedFuture(false);
     }
 
     ProcessamentoJpa processamento = processamentoOpt.get();
@@ -49,17 +57,16 @@ public class FinalizarComSucessoService {
       linkDownload = gerarLinkParaDownload(requisicao.getFilePath());
     } catch (Exception e) {
       procService.registrarErro(processamento, e.getMessage());
-      return;
+      return CompletableFuture.completedFuture(false);
     }
 
     procService.registrarConclusao(processamento, linkDownload);
+    return CompletableFuture.completedFuture(true);
   }
 
   // Método privado
   private String gerarLinkParaDownload(String objectKey)
-      throws Exception {
-    
-    S3Presigner presigner = awsConfig.buildS3Presigner();
+      throws ApplicationException {
     
     try {
       // Cria a requisição
@@ -69,15 +76,14 @@ public class FinalizarComSucessoService {
           .build();
 
       // Executa a requisição e retorna
-      PresignedGetObjectRequest presignedRequest = presigner.presignGetObject(presignRequest);
+      PresignedGetObjectRequest presignedRequest = s3presigner.presignGetObject(presignRequest);
       return presignedRequest.url().toString();
     
     } catch (RuntimeException e) {
-      String mensagem = "Ocorreu um erro ao gerar o link para download das imagens.";
-      throw new Exception(mensagem);
+      throw new ApplicationException(ApplicationMessage.GERAR_LINK);
     
     } finally {
-      presigner.close();  
+      s3presigner.close();  
     }
   }
 }

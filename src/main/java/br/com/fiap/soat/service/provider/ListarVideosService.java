@@ -6,7 +6,7 @@ import br.com.fiap.soat.entity.StatusProcessamento;
 import br.com.fiap.soat.entity.UsuarioJpa;
 import br.com.fiap.soat.mapper.ProcessamentoMapper;
 import br.com.fiap.soat.repository.ProcessamentoRepository;
-import br.com.fiap.soat.service.util.UsuarioService;
+import br.com.fiap.soat.service.other.UsuarioService;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Comparator;
 import java.util.List;
@@ -28,7 +28,7 @@ public class ListarVideosService {
   }
 
   // Método público
-  public List<ProcessamentoDto> processarRequisicao(HttpServletRequest requisicao) {
+  public List<ProcessamentoDto> listar(HttpServletRequest requisicao) {
 
     UsuarioJpa usuario = usuarioService.getUsuario(requisicao);
 
