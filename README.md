@@ -18,7 +18,7 @@ Link do vídeo demonstrando o projeto em execução:
 
 - [Objetivos](#1-objetivos)
 - [Requisitos](#2-requisitos)
-  - [Arquitetura](#21-arquitetura)
+  - [Processamento assíncrono](#21-processamento-assincrono)
   - [Banco de dados](#22-banco-de-dados)
   - [Testes](#23-testes)
   - [Pipeline](#24-pipeline)
