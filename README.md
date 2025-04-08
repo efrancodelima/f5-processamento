@@ -31,6 +31,7 @@ Link do vídeo com a apresentação do projeto:
 - [Banco de dados](#3-banco-de-dados)
   - [Modelo lógico](#31-modelo-lógico)
   - [Script SQL](#32-script-sql)
+- [Arquitetura do sistema](#4-arquitetura-do-sistema)
 
 ## 1. Objetivos
 
@@ -203,3 +204,32 @@ CREATE TABLE processamento (
     CONSTRAINT fk_usuario FOREIGN KEY (usuario_id) REFERENCES usuario(id)
 );
 ```
+
+## 4 Arquitetura do sistema
+
+Abaixo segue o diagrama da arquitetura do sistema e, em seguida, uma breve explanação sobre ele.
+
+![Arquitetura do sistema](assets/arquitetura.png)
+
+A aplicação é dividida em dois microsserviços:
+ - o microsserviço de vídeo, responsável por gerenciar o processamento do vídeo. Ele apenas gerencia o processamento, mas não processa nada (quem faz isso é o Media Convert);
+ - e o microsserviço de notificação, responsável por notificar o usuário quando o vídeo termina de processar. Ele usa o SendGrid como provedor para envio de e-mails.
+
+A aplicação roda em uma rede privada, não sendo acessível pela internet sem passar pelo API Gateway. O API Gateway expõe apenas os endpoints que podem ser consumidos pelo cliente e oculta/bloqueia os webhooks que são usados pelas lambdas.
+
+O cliente (que pode ser o front end) envia a requisição para a aplicação. A aplicação responde ao cliente com um status code 204 (No Content) assim que recebe a requisição completa (contendo a lista de vídeos).
+
+Após isso, cada vídeo da requisição continua em uma thread separada. Cada thread salva o vídeo recebido em um bucket do S3 e cria o job no Media Convert. A aplicação vai atualizando a situação do vídeo no database conforme os eventos vão ocorrendo: recebido, em processamento, concluído ou com erro.
+
+Quando o Media Convert termina o seu trabalho, o Event Bridge aciona a lambda de sucesso ou falha, conforme o caso. Se o status do job muda para concluído, um evento é acionado, se muda para erro, é outro evento e outra lambda.
+
+A lambda de sucesso irá acessar o S3 para ler e gravar dados, pois é ela quem compacta as imagens em um arquivo zip e apaga os arquivos que não serão mais necessários (o vídeo e as imagens avulsas fora do zip). No final ela chama um webhook da aplicação para dar continuidade.
+
+A aplicação irá então gerar o link presigned e enviar um e-mail para o usuário com o link para download das imagens compactadas. Esse link presigned é um link com prazo de validade gerado pela AWS que permite compartilhar arquivos do S3 com outras pessoas.
+
+A lambda de falha aciona o webhook da aplicação para comunicar a falha. A aplicação registra o motivo da falha no database e envia um e-mail informando o usuário.
+
+Um ponto importante no trabalho das lambdas é que a comunicação delas com a aplicação é assíncrona. Considerando que as lambdas são cobradas por tempo de execução, a aplicação responde com um 204 assim que o webhook é acionado.
+
+Outro ponto importante é que a tarefa de compactar as imagens está sendo feita fora da nossa aplicação. 
+Compactar imagens é um trabalho que pode consumir muita CPU e memória e, dependendo do caso, isso poderia escalar demais a nossa aplicação, aumentando os custos. A lambda possui escalabilidade automática (gerenciada pela AWS), então é um ponto a menos para nos preocuparmos.
