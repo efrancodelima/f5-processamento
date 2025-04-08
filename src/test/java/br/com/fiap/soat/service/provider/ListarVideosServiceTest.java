@@ -56,7 +56,7 @@ class ListarVideosServiceTest {
     List<ProcessamentoJpa> lista = getLista();
 
     doReturn(usuario).when(usuarioService).getUsuario(requisicao);
-    doReturn(lista).when(repository).findByUsuarioOrderByNumeroVideoDesc(usuario);
+    doReturn(lista).when(repository).findByUsuarioOrderByIdDesc(usuario);
 
     // Act
     List<ProcessamentoDto> resposta = service.listar(requisicao);
@@ -76,7 +76,7 @@ class ListarVideosServiceTest {
 
   private ProcessamentoJpa getProcessamento(StatusProcessamento status) {
     return ProcessamentoJpa.builder()
-            .statusProcessamento(status)
+            .status(status)
             .timestampInicio(LocalDateTime.now())
             .build();
   }

@@ -30,8 +30,8 @@ public class ProcessamentoJpa implements Serializable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "numero_video", nullable = false)
-  private Long numeroVideo;
+  @Column(name = "id", nullable = false)
+  private Long id;
 
   @Column(name = "nome_video", nullable = false)
   private String nomeVideo;
@@ -44,8 +44,8 @@ public class ProcessamentoJpa implements Serializable {
   private String jobId;
 
   @Enumerated(EnumType.STRING)
-  @Column(name = "status_processamento", nullable = false)
-  private StatusProcessamento statusProcessamento;
+  @Column(name = "status", nullable = false)
+  private StatusProcessamento status;
 
   @Column(name = "mensagem_erro")
   private String mensagemErro;
@@ -62,13 +62,13 @@ public class ProcessamentoJpa implements Serializable {
   @Override
   public String toString() {
     return "ProcessamentoJpa { "
-        + "numeroVideo=" + numeroVideo
-        + ", nomeVideo='" + nomeVideo + '\''
+        + "id=" + id
+        + ", nomeVideo=" + nomeVideo
         + ", usuario=" + (usuario != null ? usuario.toString() : "null")
-        + ", jobId='" + jobId + '\''
-        + ", statusProcessamento=" + statusProcessamento
-        + ", mensagemErro='" + mensagemErro + '\''
-        + ", linkDownload='" + linkDownload + '\''
+        + ", jobId=" + jobId
+        + ", status=" + status
+        + ", mensagemErro=" + mensagemErro
+        + ", linkDownload=" + linkDownload
         + ", timestampInicio=" + timestampInicio
         + ", timestampConclusao=" + timestampConclusao
         + " }";

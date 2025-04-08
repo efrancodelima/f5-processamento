@@ -4,7 +4,7 @@ public enum StatusProcessamento {
 
   RECEBIDO("Recebido"),
   PROCESSANDO("Processando"),
-  SUCESSO("Sucesso"),
+  CONCLUIDO("Concluído"),
   ERRO("Erro");
 
   private String mensagem;

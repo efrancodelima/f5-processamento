@@ -96,7 +96,7 @@ class ProcessamentoServiceTest {
     
     assertEquals(nomeVideo, arg.getNomeVideo());
     assertEquals(usuario, arg.getUsuario());
-    assertEquals(StatusProcessamento.RECEBIDO, arg.getStatusProcessamento());
+    assertEquals(StatusProcessamento.RECEBIDO, arg.getStatus());
     assertNotNull(arg.getTimestampInicio());
   }
 
@@ -116,7 +116,7 @@ class ProcessamentoServiceTest {
     assertNotNull(arg);
 
     assertEquals(jobId, arg.getJobId());
-    assertEquals(StatusProcessamento.PROCESSANDO, arg.getStatusProcessamento());
+    assertEquals(StatusProcessamento.PROCESSANDO, arg.getStatus());
   }
 
   @Test
@@ -144,7 +144,7 @@ class ProcessamentoServiceTest {
     ProcessamentoJpa processamento = repositoryArgCaptor.getValue();
     assertNotNull(processamento);
 
-    assertEquals(StatusProcessamento.ERRO, processamento.getStatusProcessamento());
+    assertEquals(StatusProcessamento.ERRO, processamento.getStatus());
     assertEquals(msgErro, processamento.getMensagemErro());
     assertNotNull(processamento.getTimestampConclusao());
 
@@ -182,7 +182,7 @@ class ProcessamentoServiceTest {
     ProcessamentoJpa processamento = repositoryArgCaptor.getValue();
     assertNotNull(processamento);
 
-    assertEquals(StatusProcessamento.SUCESSO, processamento.getStatusProcessamento());
+    assertEquals(StatusProcessamento.CONCLUIDO, processamento.getStatus());
     assertEquals(link, processamento.getLinkDownload());
     assertNotNull(processamento.getTimestampConclusao());
 
