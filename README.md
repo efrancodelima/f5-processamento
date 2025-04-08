@@ -10,20 +10,20 @@ Link do projeto no GitHub:
 - Lambda AWS de falha: https://github.com/efrancodelima/f5-lambda-falha
 - Projeto front-end: https://github.com/efrancodelima/f5-estatico
 
-Link do vídeo demonstrando o projeto em execução:
+Link do vídeo com a apresentação do projeto:
 
-- https://youtu.be/C-mozV9B57o (funcionamento da aplicação e processo de deploy)
+- PENDENTE
 
 # Índice
 
 - [Objetivos](#1-objetivos)
 - [Requisitos](#2-requisitos)
   - [Processamento assíncrono](#21-processamento-assíncrono)
-  - [Listagem dos vídeos](#24-listagem-dos-vídeos)
+  - [Listagem dos vídeos](#22-listagem-dos-vídeos)
   - [Autenticação](#23-autenticação)
-  - [Persistência dos dados](#26-persistência-dos-dados)
+  - [Persistência dos dados](#24-persistência-dos-dados)
   - [Notificações](#25-notificações)
-  - [Balanceamento de carga](#22-balanceamento-de-carga)
+  - [Balanceamento de carga](#26-balanceamento-de-carga)
   - [Escalabilidade](#27-escalabilidade)
   - [Repositórios](#28-repositórios)
   - [Qualidade do software](#29-qualidade-do-software)
@@ -31,7 +31,6 @@ Link do vídeo demonstrando o projeto em execução:
 - [Banco de dados](#3-banco-de-dados)
   - [Modelo lógico](#31-modelo-lógico)
   - [Script SQL](#32-script-sql)
-- [Instrução para rodar a aplicação](#5-instrução-para-rodar-a-aplicação)
 
 ## 1. Objetivos
 
@@ -53,13 +52,15 @@ Se vier um vídeo por requisição e houver várias requisições simultâneas, 
 
 Se vierem vários vídeos em uma requisição só, o sistema irá encaminhar cada vídeo para uma thread diferente, usando recursos de assincronismo.
 
-### 2.2 Balanceamento de carga
+### 2.2 Listagem dos vídeos
 
-"Em caso de picos o sistema não deve perder uma requisição."
+"O fluxo deve ter uma listagem de status dos vídeos de um usuário."
 
-O sistema roda no Elastic Container Service, um orquestrador de containeres próprio da AWS, e possui um load balancer associado. Os services do ECS possuem um número mínimo e máximo de tasks, o que garante a escalabilidade do sistema. Naturalmente, esses números devem ser ajustados e redimensionados conforme a demanda da aplicação.
+Esse ponto criou uma certa dúvida se o fluxo citado no documento se referia ao uso de WebFlux ou SSE, mas em contato com os professores pelo Discord foi orientado que se tratava apenas de uma lista.
 
-Além disso, um ponto importante é que o processamento do vídeo é feito pelo Media Convert da AWS. Esse processamento demanda bastante CPU e memória, então terceirizamos essa tarefa para não sobrecarregar a aplicação. A aplicação ficou responsável apenas pelas tarefas mais simples: receber o vídeo, salvá-lo no bucket S3, criar o job no Media Convert, gerar o link presigned quando o processo terminar, entre outras coisas.
+Inicialmente, pensamos em criar um endpoint que atualizaria os status dos vídeos de tempos em tempos para o cliente (usando webflux). Mas depois achei melhor criar um endpoint simples que retorna a listagem e deixar nas mãos do cliente o controle sobre a consulta. No caso, o cliente pode ser uma aplicação front end e ela decide quando e em qual intervalo de tempo ela quer consultar a listagem. Ela decide se quer consultar apenas uma vez ou se prefere ir atualizando os status, ela decide quando parar, etc.
+
+O front end não é necessário para a entrega do Tech Challenge, mas nós criamos um projeto bem simples em Angular, só para facilitar a apresentação da aplicação. Assim não será necessário ficar inserindo token de autenticação manualmente na requisição.
 
 ### 2.3 Autenticação
 
@@ -90,29 +91,7 @@ Os microsserviços da aplicação rodam na rede privada da AWS, não sendo diret
 
 Esses endpoints possuem um filtro de autenticação. O filtro, na hora de validar o token JWT, considera não apenas o conteúdo do token, mas o emissor também (que é a nossa aplicação cadastrada no Firebase). Isso corrobora na segurança do sistema.
 
-### 2.4 Listagem dos vídeos
-
-"O fluxo deve ter uma listagem de status dos vídeos de um usuário."
-
-Esse ponto criou uma certa dúvida se o fluxo citado no documento se referia ao uso de WebFlux ou SSE, mas em contato com os professores pelo Discord foi orientado que se tratava apenas de uma lista.
-
-Inicialmente, pensamos em criar um endpoint que atualizaria os status dos vídeos de tempos em tempos para o cliente (usando webflux). Mas depois achei melhor criar um endpoint simples que retorna a listagem e deixar nas mãos do cliente o controle sobre a consulta. No caso, o cliente pode ser uma aplicação front end e ela decide quando e em qual intervalo de tempo ela quer consultar a listagem. Ela decide se quer consultar apenas uma vez ou se prefere ir atualizando os status, ela decide quando parar, etc.
-
-O front end não é necessário para a entrega do Tech Challenge, mas nós criamos um projeto bem simples em Angular, só para facilitar a apresentação da aplicação. Assim não será necessário ficar inserindo token de autenticação manualmente na requisição.
-
-
-### 2.5 Notificações
-
-"Em caso de erro um usuário pode ser notificado (email ou um outro meio de comunicação)."
-
-O microsserviço de notificação foi criado só para fazer isso.
-
-Quando o usuário envia um vídeo para processar, ele recebe uma resposta 204 assim que o upload do vídeo é concluído. A aplicação não fica esperando o vídeo terminar de processar para depois responder o usuário (o que seria uma experiência bem ruim).
-
-Quando o vídeo termina de processar, um email é enviado para o usuário notificando a finalização com sucesso ou falha, conforme o caso. Se for sucesso, o link para download do arquivo zip contendo as imagens vai junto no e-mail. Se houver falha, o motivo da falha é informado no e-mail (pode ser um tipo de arquivo não compatível com o serviço, por exemplo).
-
-
-### 2.6 Persistência dos dados
+### 2.4 Persistência dos dados
 
 "O sistema deve persistir os dados."
 
@@ -131,6 +110,23 @@ Com relação aos dados de utilização do usuário, persistimos:
 
 Isso tudo será detalhado melhor mais à frente na parte de banco de dados.
 
+### 2.5 Notificações
+
+"Em caso de erro um usuário pode ser notificado (email ou um outro meio de comunicação)."
+
+O microsserviço de notificação foi criado só para fazer isso.
+
+Quando o usuário envia um vídeo para processar, ele recebe uma resposta 204 assim que o upload do vídeo é concluído. A aplicação não fica esperando o vídeo terminar de processar para depois responder o usuário (o que seria uma experiência bem ruim).
+
+Quando o vídeo termina de processar, um email é enviado para o usuário notificando a finalização com sucesso ou falha, conforme o caso. Se for sucesso, o link para download do arquivo zip contendo as imagens vai junto no e-mail. Se houver falha, o motivo da falha é informado no e-mail (pode ser um tipo de arquivo não compatível com o serviço, por exemplo).
+
+### 2.6 Balanceamento de carga
+
+"Em caso de picos o sistema não deve perder uma requisição."
+
+O sistema roda no Elastic Container Service, um orquestrador de containeres próprio da AWS, e possui um load balancer associado. Os services do ECS possuem um número mínimo e máximo de tasks, o que garante a escalabilidade do sistema. Naturalmente, esses números devem ser ajustados e redimensionados conforme a demanda da aplicação.
+
+Além disso, um ponto importante é que o processamento do vídeo é feito pelo Media Convert da AWS. Esse processamento demanda bastante CPU e memória, então terceirizamos essa tarefa para não sobrecarregar a aplicação. A aplicação ficou responsável apenas pelas tarefas mais simples: receber o vídeo, salvá-lo no bucket S3, criar o job no Media Convert, gerar o link presigned quando o processo terminar, entre outras coisas.
 
 ### 2.7 Escalabilidade
 
@@ -138,13 +134,11 @@ Isso tudo será detalhado melhor mais à frente na parte de banco de dados.
 
 Ok, o sistema roda no Elastic Container Service e utiliza o banco de dados Aurora. Ambos pertencem ao ecossistema da AWS e ambos são escaláveis. No caso do banco de dados, a escalabilidade é automática, gerenciada pela própria AWS. No caso do ECS, podemos configurar o número mínimo e máximo de tasks, bem como as regras de escalabilidade.
 
-
 ### 2.8 Repositórios
 
 "O projeto deve ser versionado no Github."
 
 Ok, os links para os repositórios se encontram no início deste documento. Os repositórios têm a branch main protegida e só aceitam merge por meio de pull request.
-
 
 ### 2.9 Qualidade do software
 
@@ -165,7 +159,6 @@ Abaixo segue a evidência dos testes:
 
 ![Tela do Sonar Cloud](assets/tela-sonar.png)
 
-
 ### 2.10 Pipeline
 
 "CI/CD da aplicação."
@@ -184,7 +177,7 @@ O banco de dados escolhido para a aplicação foi o Aurora, um banco de dados re
 
 ![Modelo lógico](assets/erd.png)
 
-É um modelo que visa armazenar somente as informações necessárias para a proposta atual. Conforme o sistema for crescendo, talvez seja interessante guardar mais dados do usuário (para fins de cobrança, por exemplo), ter uma entidade só para o vídeo, outra para o histórico do processamento (guardando o registro de cada mudança de status), etc. Mas, no momento, o modelo atual atende o que foi pedido.
+É um modelo que visa armazenar somente as informações necessárias para a proposta atual. Conforme o sistema for crescendo, talvez seja interessante guardar mais dados do usuário (para fins de cobrança, por exemplo), ter uma entidade só para o vídeo, outra para o histórico do processamento (guardando o registro de cada mudança de status), etc. Mas, no momento, o modelo acima atende o que foi pedido.
 
 ### 3.2 Script SQL
 
