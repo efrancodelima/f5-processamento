@@ -232,4 +232,4 @@ A lambda de falha aciona o webhook da aplicação (sempre passando pelo load bal
 Um ponto importante no trabalho das lambdas é que a comunicação delas com a aplicação é assíncrona. Considerando que as lambdas são cobradas por tempo de execução, a aplicação responde com um 204 assim que o webhook é acionado.
 
 Outro ponto importante é que a tarefa de compactar as imagens está sendo feita fora da nossa aplicação. 
-Compactar imagens é um trabalho que pode consumir muita CPU e memória e, dependendo do caso, isso poderia escalar demais a nossa aplicação, aumentando os custos. A lambda possui escalabilidade automática (gerenciada pela AWS), então é um ponto a menos para nos preocuparmos.
+Compactar imagens é um trabalho que pode consumir muita CPU e memória e, dependendo do caso, isso poderia escalar demais a nossa aplicação, aumentando os custos ou até mesmo causando indisponibilidade (caso o máximo de tasks seja atingido). A lambda possui escalabilidade automática (gerenciada pela AWS), então é um ponto a menos para nos preocuparmos.
