@@ -83,7 +83,7 @@ class ProcessarVideoServiceTest {
   void deveRegistrarProcessamentoVideo() throws Exception {
 
     // Arrange
-    doReturn(1L).when(processamento).getNumeroVideo();
+    doReturn(1L).when(processamento).getId();
 
     doReturn(processamento).when(procService).registrarRecebimento(video, usuario);
 
@@ -113,7 +113,7 @@ class ProcessarVideoServiceTest {
   void deveRegistrarErroQuandoContentVideoForNulo() throws Exception {
 
     // Arrange
-    doReturn(1L).when(processamento).getNumeroVideo();
+    doReturn(1L).when(processamento).getId();
 
     doReturn(processamento).when(procService).registrarRecebimento(video, usuario);
 
@@ -152,7 +152,7 @@ class ProcessarVideoServiceTest {
         () -> SalvarArquivo.salvar(Mockito.any(), Mockito.anyString())
       ).thenThrow(new IOException());
 
-      doReturn(1L).when(processamento).getNumeroVideo();
+      doReturn(1L).when(processamento).getId();
 
       doReturn(processamento).when(procService).registrarRecebimento(video, usuario);
 
@@ -177,7 +177,7 @@ class ProcessarVideoServiceTest {
   void deveRegistrarErroQuandoEnviarVideoParaS3Falhar() throws Exception {
 
     // Arrange
-    doReturn(1L).when(processamento).getNumeroVideo();
+    doReturn(1L).when(processamento).getId();
 
     doReturn(processamento).when(procService).registrarRecebimento(video, usuario);
 
@@ -204,7 +204,7 @@ class ProcessarVideoServiceTest {
   void deveRegistrarErroQuandoCriarJobFalhar() throws Exception {
 
     // Arrange
-    doReturn(1L).when(processamento).getNumeroVideo();
+    doReturn(1L).when(processamento).getId();
 
     doReturn(processamento).when(procService).registrarRecebimento(video, usuario);
 

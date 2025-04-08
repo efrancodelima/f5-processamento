@@ -21,7 +21,7 @@ public class ProcessamentoMapper {
     
     var resposta = new ProcessamentoDto();
     resposta.setNomeArquivo(proc.getNomeVideo());
-    resposta.setStatusProcessamento(proc.getStatusProcessamento().getMessage());
+    resposta.setStatusProcessamento(proc.getStatus().getMessage());
     resposta.setMensagemErro(proc.getMensagemErro());
     resposta.setLinkDownload(proc.getLinkDownload());
     resposta.setTimestampInicio(proc.getTimestampInicio().toString());

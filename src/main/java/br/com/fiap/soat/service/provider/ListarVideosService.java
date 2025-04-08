@@ -32,7 +32,7 @@ public class ListarVideosService {
 
     UsuarioJpa usuario = usuarioService.getUsuario(requisicao);
 
-    var listaJpa = repository.findByUsuarioOrderByNumeroVideoDesc(usuario);
+    var listaJpa = repository.findByUsuarioOrderByIdDesc(usuario);
     ordenarLista(listaJpa);
 
     return ProcessamentoMapper.toDto(listaJpa);
@@ -40,8 +40,7 @@ public class ListarVideosService {
 
   private void ordenarLista(List<ProcessamentoJpa> lista) {
     lista.sort(Comparator
-        .comparing((ProcessamentoJpa p) -> !StatusProcessamento.RECEBIDO
-            .equals(p.getStatusProcessamento()))
+        .comparing((ProcessamentoJpa p) -> !StatusProcessamento.RECEBIDO.equals(p.getStatus()))
         .thenComparing(p -> p.getTimestampInicio(), Comparator.reverseOrder())
     );
   }

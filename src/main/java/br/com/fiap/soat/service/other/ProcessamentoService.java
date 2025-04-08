@@ -36,7 +36,7 @@ public class ProcessamentoService {
     var processamento = ProcessamentoJpa.builder()
         .nomeVideo(video.getName())
         .usuario(usuario)
-        .statusProcessamento(StatusProcessamento.RECEBIDO)
+        .status(StatusProcessamento.RECEBIDO)
         .timestampInicio(LocalDateTime.now())
         .build();
 
@@ -44,13 +44,13 @@ public class ProcessamentoService {
   }
 
   public void registrarProcessamento(ProcessamentoJpa processamento, String jobId) {
-    processamento.setStatusProcessamento(StatusProcessamento.PROCESSANDO);
+    processamento.setStatus(StatusProcessamento.PROCESSANDO);
     processamento.setJobId(jobId);
     repository.save(processamento);
   }
 
   public void registrarErro(ProcessamentoJpa processamento, String msgErro) {
-    processamento.setStatusProcessamento(StatusProcessamento.ERRO);
+    processamento.setStatus(StatusProcessamento.ERRO);
     processamento.setMensagemErro(msgErro);
     processamento.setTimestampConclusao(LocalDateTime.now());
     repository.save(processamento);
@@ -62,7 +62,7 @@ public class ProcessamentoService {
   }
 
   public void registrarConclusao(ProcessamentoJpa processamento, String linkArquivo) {
-    processamento.setStatusProcessamento(StatusProcessamento.SUCESSO);
+    processamento.setStatus(StatusProcessamento.CONCLUIDO);
     processamento.setLinkDownload(linkArquivo);
     processamento.setTimestampConclusao(LocalDateTime.now());
     repository.save(processamento);

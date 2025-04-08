@@ -55,7 +55,7 @@ public class ProcessarVideoService {
     
     String diretorioLocal = TEMP_DIR + UUID.randomUUID().toString() + "/";
 
-    String diretorioS3 = usuario.getId().toString() + "/" + processamento.getNumeroVideo() + "/";
+    String diretorioS3 = usuario.getId().toString() + "/" + processamento.getId() + "/";
     String caminhoVideoS3 = diretorioS3 + "input/" + video.getName();
     String diretorioOutputS3 = diretorioS3 + "output/";
 

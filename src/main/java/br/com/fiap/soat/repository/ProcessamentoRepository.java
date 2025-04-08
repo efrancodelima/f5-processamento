@@ -9,9 +9,8 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ProcessamentoRepository extends JpaRepository<ProcessamentoJpa, Long> {
-
-  // Busca os registros de um usuário, ordenados pelo timestamp (mais recente primeiro)
-  List<ProcessamentoJpa> findByUsuarioOrderByNumeroVideoDesc(UsuarioJpa usuario);
+  
+  List<ProcessamentoJpa> findByUsuarioOrderByIdDesc(UsuarioJpa usuario);
 
   Optional<ProcessamentoJpa> findByJobId(String jobId);
 }
