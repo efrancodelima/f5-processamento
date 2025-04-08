@@ -4,8 +4,11 @@ Projeto realizado como atividade avaliativa do curso de **Software Architecture 
 
 Link do projeto no GitHub:
 
-- Microsserviço de VIDEO: https://github.com/efrancodelima/pedido
-- Microsserviço de NOTIFICACAO: https://github.com/efrancodelima/pagamento
+- Microsserviço de VIDEO: https://github.com/efrancodelima/f5-processamento
+- Microsserviço de NOTIFICACAO: https://github.com/efrancodelima/f5-notificacao
+- Lambda AWS de sucesso: https://github.com/efrancodelima/f5-lambda-sucesso
+- Lambda AWS de falha: https://github.com/efrancodelima/f5-lambda-falha
+- Projeto front-end: https://github.com/efrancodelima/f5-estatico
 
 Link do vídeo demonstrando o projeto em execução:
 
@@ -30,7 +33,9 @@ Link do vídeo demonstrando o projeto em execução:
 
 ## 1. Objetivos
 
-Desenvolver um sistema para uma lanchonete local em fase de expansão. O sistema deverá realizar o controle dos pedidos, além de outras funções correlatas, conforme especificado no Tech Challenge.
+Desenvolver uma aplicação capaz de processar imagens a partir de um vídeo, ou seja, capturar frames do vídeo em um intervalo regular de tempo. A aplicação deve utilizar os conceitos apresentados no curso, conforme especificado no Tech Challenge.
+
+Mais detalhes sobre o projeto serão mostrados na parte de requisitos.
 
 ## 2. Requisitos
 
@@ -40,17 +45,19 @@ Desenvolver um sistema para uma lanchonete local em fase de expansão. O sistema
 
 O microsserviço de processamento possui um endpoint para receber um ou mais vídeos.
 
-Deixamos a cargo do cliente da aplicação escolher se deseja enviar vários vídeos em uma requisição só ou em requisições separadas. Em qualquer caso, os vídeos serão processados simultaneamente, em diferentes threads.
+Colocamos um limite de 300 MB por upload, que pode ser alterado conforme a necessidade. O cliente pode escolher se deseja enviar vários vídeos em uma requisição só ou em requisições separadas, desde que respeite o limite de upload. Em qualquer caso, os vídeos serão processados simultaneamente, em diferentes threads.
 
 Se vier um vídeo por requisição e houver várias requisições simultâneas, o processamento dos vídeos também será simultâneo, pois esse já é o comportamento padrão de um microsserviço Java/Spring: cada requisição roda em uma thread separada.
 
 Se vierem vários vídeos em uma requisição só, o sistema irá encaminhar cada vídeo para uma thread diferente, usando recursos de assincronismo.
 
-### 2.2 Balancemaneto de carga
+### 2.2 Balanceamento de carga
 
 "Em caso de picos o sistema não deve perder uma requisição."
 
-O sistema roda na AWS ECS, um orquestrador de containeres próprio da AWS. Foi implementado balanceamento de carga para que nenhuma requisição seja perdida. Naturalmente, esse balanceamento deve ser ajustado e redimensionado conforme a demanda da aplicação.
+O sistema roda no Elastic Container Service, um orquestrador de containeres próprio da AWS, e possui um load balancer associado. Os services do ECS possuem um número mínimo e máximo de tasks, o que garante a escalabilidade do sistema. Naturalmente, esses números devem ser ajustados e redimensionados conforme a demanda da aplicação.
+
+Além disso, um ponto importante é que o processamento do vídeo é feito pelo Media Convert da AWS. Esse processamento demanda bastante CPU e memória, então terceirizamos essa tarefa para não sobrecarregar a aplicação. A aplicação ficou responsável apenas pelas tarefas mais simples: receber o vídeo, salvá-lo no bucket S3, criar o job no Media Convert, gerar o link presigned quando o processo terminar, entre outras coisas.
 
 ### 2.3 Autenticação
 
@@ -66,7 +73,7 @@ Por que escolhi usar a conta Google como forma de autenticação?
 Por dois motivos:
 - Usar uma conta já existente é mais prático e oferece uma experiência mais agradável ao usuário, que não vai precisar preencher um novo cadastro;
 - Hoje em dia a maioria dos usuários web possui uma conta Google (em 2024 o Google tinha mais de 2 bilhões de usuários ativos);
-- Poderia ter usado o Cognito, mas já usei ele no Tech Challenge da fase 3, então não agregaria nenhuma novidade (embora também fosse uma boa solução).
+- Poderia ter usado o Cognito, mas já usei ele no Tech Challenge da fase 3, então não agregaria nenhum aprendizado novo (embora também fosse uma boa solução).
 
 GERADOR DE TOKEN
 
@@ -77,14 +84,9 @@ O firebase é uma ferramenta interessante porque oferece várias opções de log
 
 VALIDAÇÃO DO TOKEN NA APLICAÇÃO
 
-O sistema possui 2 microsserviços: "processamento" e "notificação".
+Os microsserviços da aplicação rodam na rede privada da AWS, não sendo diretamente acessíveis pela internet. Os endpoints que o usuário necessita acessar (video/upload e video/listar) são expostos por meio de um API Gateway.
 
-O usuário só se comunica com o sistema de processamento, que possui um filtro de autenticação. Esse filtro age de forma global, atuando em todos os endpoints (só tem dois na verdade: enviar e listar vídeos).
-
-O filtro, na hora de validar o token JWT, considera não apenas o conteúdo do token, mas o emissor também (que é a nossa aplicação cadastrada no Firebase). Isso corrobora na segurança do sistema.
-
-O microsserviço de notificação é consumido apenas pelo microsserviço de processamento. Ele roda em uma VPC privada dentro da AWS e não é acessível ao usuário.
-
+Esses endpoints possuem um filtro de autenticação. O filtro, na hora de validar o token JWT, considera não apenas o conteúdo do token, mas o emissor também (que é a nossa aplicação cadastrada no Firebase). Isso corrobora na segurança do sistema.
 
 ### 2.4 Listar os status dos vídeos
 
@@ -92,9 +94,10 @@ O microsserviço de notificação é consumido apenas pelo microsserviço de pro
 
 Esse ponto criou uma certa dúvida se o fluxo citado no documento se referia ao uso de WebFlux ou SSE, mas em contato com os professores pelo Discord foi orientado que se tratava apenas de uma lista.
 
-Inicialmente, eu pensei em criar um endpoint que atualizaria os status dos vídeos de tempos em tempos para o cliente (usando webflux). Mas depois achei melhor criar um endpoint simples que retorna a listagem e deixar nas maõs do cliente o controle sobre a consulta. No caso, o cliente pode ser uma aplicação front end e ela decide quando e em qual intervalo de tempo ela quer consultar a listagem. Ela decide se quer consultar apenas uma vez ou se prefere ir atualizando os status, ela decide quando parar, etc.
+Inicialmente, pensamos em criar um endpoint que atualizaria os status dos vídeos de tempos em tempos para o cliente (usando webflux). Mas depois achei melhor criar um endpoint simples que retorna a listagem e deixar nas mãos do cliente o controle sobre a consulta. No caso, o cliente pode ser uma aplicação front end e ela decide quando e em qual intervalo de tempo ela quer consultar a listagem. Ela decide se quer consultar apenas uma vez ou se prefere ir atualizando os status, ela decide quando parar, etc.
 
-O front end não é necessário para a entrega do Tech Challenge, mas eu criei um projeto em Angular bem simples, só para deixar a demonstração da aplicação mais simples. Assim não será necessário ficar inserindo token de autenticação manualmente na requisição.
+O front end não é necessário para a entrega do Tech Challenge, mas nós criamos um projeto bem simples em Angular, só para facilitar a apresentação da aplicação. Assim não será necessário ficar inserindo token de autenticação manualmente na requisição.
+
 
 ### 2.5 Notificações
 
@@ -102,9 +105,9 @@ O front end não é necessário para a entrega do Tech Challenge, mas eu criei u
 
 O microsserviço de notificação foi criado só para fazer isso.
 
-Quando o usuário envia um vídeo para processar, ele recebe uma resposta 204 assim que o upload do vídeo é concluído. Quando a aplicação finaliza o processamento de um vídeo, um email é enviado para o usuário notificando a finalização com sucesso ou falha, conforme o caso.
+Quando o usuário envia um vídeo para processar, ele recebe uma resposta 204 assim que o upload do vídeo é concluído. A aplicação não fica esperando o vídeo terminar de processar para depois responder o usuário (o que seria uma experiência bem ruim).
 
-Se for sucesso, o link para download do arquivo zip contendo as imagens vai junto no e-mail. Se houver falha, o motivo da falha é informado no e-mail (pode ser um tipo de arquivo não compatível com o serviço, por exemplo).
+Quando o vídeo termina de processar, um email é enviado para o usuário notificando a finalização com sucesso ou falha, conforme o caso. Se for sucesso, o link para download do arquivo zip contendo as imagens vai junto no e-mail. Se houver falha, o motivo da falha é informado no e-mail (pode ser um tipo de arquivo não compatível com o serviço, por exemplo).
 
 
 ### 2.6 Persistência dos dados
@@ -120,7 +123,7 @@ Com relação aos dados de utilização do usuário, persistimos:
 - nome do vídeo recebido;
 - timestamp do recebimento do vídeo;
 - status do vídeo;
-- timestamp do status;
+- timestamp da conclusão;
 - mensagem de erro, se houver;
 - link para download do arquivo zip.
 
@@ -131,7 +134,8 @@ Isso tudo será detalhado melhor mais à frente na parte de banco de dados.
 
 "O sistema deve estar em uma arquitetura que o permita ser escalado."
 
-Ok, o sistema roda na AWS ECS e utiliza o banco de dados AWS Aurora. Ambos são escaláveis.
+Ok, o sistema roda no Elastic Container Service e utiliza o banco de dados Aurora. Ambos pertencem ao ecossistema da AWS e ambos são escaláveis. No caso do banco de dados, a escalabilidade é automática, gerenciada pela própria AWS. No caso do ECS, podemos configurar o número mínimo e máximo de tasks, bem como as regras de escalabilidade.
+
 
 ### 2.8 Repositórios
 
@@ -155,14 +159,21 @@ O script confere e imprime os dados, item por item, no log da pipeline:
 - maintainability analysis (code smells and rating);
 - quality gate (status).
 
+
 ### 2.10 Pipeline
 
 "CI/CD da aplicação."
 
 A pipeline segue o padrão dos projetos anteriores: ela valida a qualidade do código (conforme descrito no item anterior) e, se a qualidade estiver ok, faz o build da imagem docker, faz o push no ECR e o deploy no ECS. Se der qualquer erro, a pipeline é interrompida.
 
+Links para o job completo da pipeline:
+- Microsserviço de processamento: https://github.com/efrancodelima/f5-processamento/actions/runs/14322269037/job/40141338166
+- Microsserviço de notificação: https://github.com/efrancodelima/f5-notificacao/actions/runs/14320065155/job/40135129961
+
 
 ## 3 Evidência dos testes
+
+
 
 ## 4 Banco de dados
 
