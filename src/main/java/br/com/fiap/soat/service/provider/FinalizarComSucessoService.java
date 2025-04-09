@@ -1,5 +1,13 @@
 package br.com.fiap.soat.service.provider;
 
+import java.time.Duration;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
+
 import br.com.fiap.soat.config.AwsConfig;
 import br.com.fiap.soat.dto.SucessoDto;
 import br.com.fiap.soat.entity.ProcessamentoJpa;
@@ -8,13 +16,6 @@ import br.com.fiap.soat.exception.BadGatewayException;
 import br.com.fiap.soat.exception.messages.ApplicationMessage;
 import br.com.fiap.soat.service.other.ProcessamentoService;
 import br.com.fiap.soat.util.LoggerAplicacao;
-import java.time.Duration;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
@@ -27,14 +28,11 @@ public class FinalizarComSucessoService {
 
   private final AwsConfig awsConfig;
   private final ProcessamentoService procService;
-  private final S3Presigner s3presigner;
 
   // Construtor
   @Autowired
-  public FinalizarComSucessoService(AwsConfig awsConfig, S3Presigner s3presigner,
-      ProcessamentoService procService) {
+  public FinalizarComSucessoService(AwsConfig awsConfig, ProcessamentoService procService) {
     this.awsConfig = awsConfig;
-    this.s3presigner = s3presigner;
     this.procService = procService;
   }
 
@@ -67,7 +65,8 @@ public class FinalizarComSucessoService {
   // Método privado
   private String gerarLinkParaDownload(String objectKey)
       throws ApplicationException {
-    
+    S3Presigner s3Presigner = awsConfig.buildS3Presigner();
+
     try {
       // Cria a requisição
       GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
@@ -76,14 +75,14 @@ public class FinalizarComSucessoService {
           .build();
 
       // Executa a requisição e retorna
-      PresignedGetObjectRequest presignedRequest = s3presigner.presignGetObject(presignRequest);
+      PresignedGetObjectRequest presignedRequest = s3Presigner.presignGetObject(presignRequest);
       return presignedRequest.url().toString();
     
     } catch (RuntimeException e) {
       throw new ApplicationException(ApplicationMessage.GERAR_LINK);
     
     } finally {
-      s3presigner.close();  
+      s3Presigner.close();  
     }
   }
 }

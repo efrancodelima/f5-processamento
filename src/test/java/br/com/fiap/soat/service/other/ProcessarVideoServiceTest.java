@@ -43,9 +43,6 @@ class ProcessarVideoServiceTest {
   AwsConfig awsConfig;
 
   @Mock
-  S3Client s3Client;
-
-  @Mock
   CriarJobService criarJobService;
 
   @Mock
@@ -56,6 +53,9 @@ class ProcessarVideoServiceTest {
   
   @Mock
   UsuarioJpa usuario;
+
+  @Mock
+  S3Client s3Client;
 
   @Mock
   PutObjectResponse putObjectResponse;
@@ -72,6 +72,7 @@ class ProcessarVideoServiceTest {
   @BeforeEach
   void setup() {
     closeable = MockitoAnnotations.openMocks(this);
+    doReturn(s3Client).when(awsConfig).buildS3Client();
   }
 
   @AfterEach
