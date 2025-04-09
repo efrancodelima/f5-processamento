@@ -41,3 +41,5 @@ aws:
 notificacao:
   service:
     url: url-servico-notificacao
+cors:
+  origin: http://localhost:4200
