@@ -20,14 +20,13 @@ Link do vídeo com a apresentação do projeto:
 - [Requisitos](#2-requisitos)
   - [Processamento assíncrono](#21-processamento-assíncrono)
   - [Listagem dos vídeos](#22-listagem-dos-vídeos)
-  - [Autenticação](#23-autenticação)
-  - [Persistência dos dados](#24-persistência-dos-dados)
-  - [Notificações](#25-notificações)
-  - [Balanceamento de carga](#26-balanceamento-de-carga)
-  - [Escalabilidade](#27-escalabilidade)
-  - [Repositórios](#28-repositórios)
-  - [Qualidade do software](#29-qualidade-do-software)
-  - [Pipeline](#210-pipeline)
+  - [Notificações](#23-notificações)
+  - [Autenticação](#24-autenticação)
+  - [Persistência dos dados](#25-persistência-dos-dados)
+  - [Balanceamento de carga e escalabilidade](#26-balanceamento-de-carga-e-escalabilidade)
+  - [Repositórios](#27-repositórios)
+  - [Qualidade do software](#28-qualidade-do-software)
+  - [Pipeline](#29-pipeline)
 - [Banco de dados](#3-banco-de-dados)
   - [Modelo lógico](#31-modelo-lógico)
   - [Script SQL](#32-script-sql)
@@ -43,7 +42,7 @@ Mais detalhes sobre o projeto serão mostrados na parte de requisitos.
 
 ### 2.1 Processamento assíncrono
 
-"A nova versão do sistema deve processar mais de um vídeo ao mesmo tempo."
+> A nova versão do sistema deve processar mais de um vídeo ao mesmo tempo.
 
 O microsserviço de processamento possui um endpoint para receber um ou mais vídeos.
 
@@ -55,7 +54,7 @@ Se vierem vários vídeos em uma requisição só, o sistema irá encaminhar cad
 
 ### 2.2 Listagem dos vídeos
 
-"O fluxo deve ter uma listagem de status dos vídeos de um usuário."
+> O fluxo deve ter uma listagem de status dos vídeos de um usuário.
 
 Esse ponto criou uma certa dúvida se o fluxo citado no documento se referia ao uso de WebFlux ou SSE, mas em contato com os professores pelo Discord foi orientado que se tratava apenas de uma lista.
 
@@ -63,9 +62,19 @@ Inicialmente, pensamos em criar um endpoint que atualizaria os status dos vídeo
 
 O front end não é necessário para a entrega do Tech Challenge, mas nós criamos um projeto bem simples em Angular, só para facilitar a apresentação da aplicação. Assim não será necessário ficar inserindo token de autenticação manualmente na requisição.
 
-### 2.3 Autenticação
+### 2.3 Notificações
 
-"O sistema deve ser protegido por usuário e senha."
+> Em caso de erro um usuário pode ser notificado (email ou um outro meio de comunicação).
+
+O microsserviço de notificação foi criado só para fazer isso.
+
+Quando o usuário envia um vídeo para processar, ele recebe uma resposta 204 assim que o upload do vídeo é concluído. A aplicação não fica esperando o vídeo terminar de processar para depois responder o usuário (o que seria uma experiência bem ruim).
+
+Quando o vídeo termina de processar, um email é enviado para o usuário notificando a finalização com sucesso ou falha, conforme o caso. Se for sucesso, o link para download do arquivo zip contendo as imagens vai junto no e-mail. Se houver falha, o motivo da falha é informado no e-mail (pode ser um tipo de arquivo não compatível com o serviço, por exemplo).
+
+### 2.4 Autenticação
+
+> O sistema deve ser protegido por usuário e senha.
 
 FORMA DE AUTENTICAÇÃO
 
@@ -92,9 +101,9 @@ Os microsserviços da aplicação rodam na rede privada da AWS, não sendo diret
 
 Esses endpoints possuem um filtro de autenticação. O filtro, na hora de validar o token JWT, considera não apenas o conteúdo do token, mas o emissor também (que é a nossa aplicação cadastrada no Firebase). Isso corrobora na segurança do sistema.
 
-### 2.4 Persistência dos dados
+### 2.5 Persistência dos dados
 
-"O sistema deve persistir os dados."
+> O sistema deve persistir os dados.
 
 O sistema persiste os dados de uso do usuário e o arquivo zip gerado.
 
@@ -111,39 +120,32 @@ Com relação aos dados de utilização do usuário, persistimos:
 
 Isso tudo será detalhado melhor mais à frente na parte de banco de dados.
 
-### 2.5 Notificações
+### 2.6 Balanceamento de carga e escalabilidade
 
-"Em caso de erro um usuário pode ser notificado (email ou um outro meio de comunicação)."
+> Em caso de picos o sistema não deve perder uma requisição.  
+> O sistema deve estar em uma arquitetura que o permita ser escalado.
 
-O microsserviço de notificação foi criado só para fazer isso.
+O balanceamento de carga é garantido pelo Network Load Balancer.
 
-Quando o usuário envia um vídeo para processar, ele recebe uma resposta 204 assim que o upload do vídeo é concluído. A aplicação não fica esperando o vídeo terminar de processar para depois responder o usuário (o que seria uma experiência bem ruim).
+Os microsserviços rodam no Elastic Container Service, um orquestrador de containeres próprio da AWS. Os services do ECS possuem um número mínimo e máximo de tasks, o que garante a escalabilidade. Naturalmente, esses números devem ser ajustados e redimensionados conforme a demanda da aplicação.
 
-Quando o vídeo termina de processar, um email é enviado para o usuário notificando a finalização com sucesso ou falha, conforme o caso. Se for sucesso, o link para download do arquivo zip contendo as imagens vai junto no e-mail. Se houver falha, o motivo da falha é informado no e-mail (pode ser um tipo de arquivo não compatível com o serviço, por exemplo).
+Além dos microsserviços, temos o banco de dados Aurora, as lambdas e o Media Convert. Todos são escaláveis, mas neste caso a escalabilidade é gerenciada pela própria AWS, o que facilita um pouco as coisas para a equipe de desenvolvimento.
 
-### 2.6 Balanceamento de carga
+Dois pontos importantes são que:
+- o processamento do vídeo é feito pelo Media Convert e;
+- a compactação das imagens é feita por uma lambda.
 
-"Em caso de picos o sistema não deve perder uma requisição."
+Esses pontos são críticos, pois são os que mais consomem recursos (CPU e memória), então terceirizamos essas tarefas para não sobrecarregar a aplicação. A aplicação ficou responsável apenas pelas tarefas mais simples: receber o vídeo, salvá-lo no bucket S3, criar o job no Media Convert, gerar o link presigned quando o processo terminar, entre outras coisas.
 
-O sistema roda no Elastic Container Service, um orquestrador de containeres próprio da AWS, e possui um load balancer associado. Os services do ECS possuem um número mínimo e máximo de tasks, o que garante a escalabilidade do sistema. Naturalmente, esses números devem ser ajustados e redimensionados conforme a demanda da aplicação.
+### 2.7 Repositórios
 
-Além disso, um ponto importante é que o processamento do vídeo é feito pelo Media Convert da AWS. Esse processamento demanda bastante CPU e memória, então terceirizamos essa tarefa para não sobrecarregar a aplicação. A aplicação ficou responsável apenas pelas tarefas mais simples: receber o vídeo, salvá-lo no bucket S3, criar o job no Media Convert, gerar o link presigned quando o processo terminar, entre outras coisas.
-
-### 2.7 Escalabilidade
-
-"O sistema deve estar em uma arquitetura que o permita ser escalado."
-
-Ok, o sistema roda no Elastic Container Service e utiliza o banco de dados Aurora. Ambos pertencem ao ecossistema da AWS e ambos são escaláveis. No caso do banco de dados, a escalabilidade é automática, gerenciada pela própria AWS. No caso do ECS, podemos configurar o número mínimo e máximo de tasks, bem como as regras de escalabilidade.
-
-### 2.8 Repositórios
-
-"O projeto deve ser versionado no Github."
+> O projeto deve ser versionado no Github.
 
 Ok, os links para os repositórios se encontram no início deste documento. Os repositórios têm a branch main protegida e só aceitam merge por meio de pull request.
 
-### 2.9 Qualidade do software
+### 2.8 Qualidade do software
 
-"O projeto deve ter testes que garantam a sua qualidade."
+> O projeto deve ter testes que garantam a sua qualidade.
 
 Cada microsserviço possui cobertura de testes mínima de 80% e análise de issues/vulnerabilidades pelo Sonar.
 
@@ -160,9 +162,9 @@ Abaixo segue a evidência dos testes:
 
 ![Tela do Sonar Cloud](assets/tela-sonar.png)
 
-### 2.10 Pipeline
+### 2.9 Pipeline
 
-"CI/CD da aplicação."
+> CI/CD da aplicação.
 
 A pipeline segue o padrão dos projetos anteriores: ela valida a qualidade do código (conforme descrito no item anterior) e, se a qualidade estiver ok, faz o build da imagem docker, faz o push no ECR e o deploy no ECS. Se der qualquer erro, a pipeline é interrompida.
 
@@ -234,6 +236,3 @@ A aplicação irá então gerar o link presigned e enviar um e-mail para o usuá
 A lambda de falha aciona o webhook da aplicação (sempre passando pelo load balancer) para comunicar a falha. A aplicação registra o motivo da falha no database e envia um e-mail informando o usuário.
 
 Um ponto importante no trabalho das lambdas é que a comunicação delas com a aplicação é assíncrona. Considerando que as lambdas são cobradas por tempo de execução, a aplicação responde com um 204 assim que o webhook é acionado.
-
-Outro ponto importante é que a tarefa de compactar as imagens está sendo feita fora da nossa aplicação. 
-Compactar imagens é um trabalho que pode consumir muita CPU e memória e, dependendo do caso, isso poderia escalar demais a nossa aplicação, aumentando os custos ou até mesmo causando indisponibilidade (caso o máximo de tasks seja atingido). A lambda possui escalabilidade automática (gerenciada pela AWS), então é um ponto a menos para nos preocuparmos.
