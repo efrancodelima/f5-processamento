@@ -23,8 +23,8 @@ public class WebMvcConfig {
         @Override
         public void addCorsMappings(CorsRegistry registry) {
           registry.addMapping("/**")
-              // .allowedOrigins("*")
-              .allowedOriginPatterns("*")
+              .allowedOrigins("https://main.dmhj52h2c3486.amplifyapp.com/")
+              // .allowedOriginPatterns("*")
               .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
               .allowedHeaders("*")
               .exposedHeaders("Access-Control-Allow-Origin",
