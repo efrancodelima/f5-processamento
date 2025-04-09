@@ -6,7 +6,7 @@
 
     <groupId>br.com.fiap.soat</groupId>
     <artifactId>app-video</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <packaging>jar</packaging>
     <name>Microsserviço de vídeo</name>
     <description>Captura frames de um vídeo a cada intervalo de tempo</description>
