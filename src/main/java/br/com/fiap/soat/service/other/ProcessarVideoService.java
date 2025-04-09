@@ -108,6 +108,7 @@ public class ProcessarVideoService {
       s3Client.putObject(putRequest, RequestBody.fromFile(localPath));
     
     } catch (RuntimeException e) {
+      LoggerAplicacao.error(e.getMessage());
       throw new ApplicationException(ApplicationMessage.ENVIAR_S3);
     }
   }
@@ -129,6 +130,7 @@ public class ProcessarVideoService {
       return response.job().id();
 
     } catch (Exception e) {
+      LoggerAplicacao.error(e.getMessage());
       throw new ApplicationException(ApplicationMessage.CRIAR_JOB);
     }
   }
