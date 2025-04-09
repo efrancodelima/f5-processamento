@@ -66,7 +66,7 @@ public class JwtAuthFilter extends HttpFilter {
       request.setAttribute("claims", claims);
 
     } catch (Exception e) {
-      LoggerAplicacao.error(e.getMessage());
+      LoggerAplicacao.error("Erro ao decodificar o token: " + e.getMessage());
       response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Acesso não autorizado.");
       return;
     }
@@ -131,8 +131,7 @@ public class JwtAuthFilter extends HttpFilter {
     
     X509Certificate certificado;
     Map<String, String> certificados = googleCerts.getGoogleCertificates();
-    LoggerAplicacao.error(certificados.toString());
-
+    
     // Seleciona o certificado correspondente ao kid
     String certificadoPem = certificados.get(kid);
     if (certificadoPem == null) {
