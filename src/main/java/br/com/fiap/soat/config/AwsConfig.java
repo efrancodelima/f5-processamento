@@ -4,6 +4,7 @@ import java.net.URI;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
@@ -26,6 +27,7 @@ public class AwsConfig {
   private String mediaConvertEndpoint;
   
   @Bean
+  @Scope("prototype")
   public S3Client s3Client() {
     return S3Client.builder()
         .region(obtainRegion())
@@ -34,6 +36,7 @@ public class AwsConfig {
   }
   
   @Bean
+  @Scope("prototype")
   public S3Presigner s3Presigner() {
     return S3Presigner.builder()
         .region(obtainRegion())
@@ -42,6 +45,7 @@ public class AwsConfig {
   }
 
   @Bean
+  @Scope("prototype")
   public MediaConvertClient mediaConvertClient() {
     return MediaConvertClient.builder()
         .endpointOverride(URI.create(mediaConvertEndpoint))
