@@ -32,6 +32,8 @@ aws:
 notificacao:
   service:
     url: ${URL_SERV_NOTIFICACAO}
+cors:
+  origin: ${CORS_ALLOWED_ORIGIN}
 
 # Profile local
 ---
