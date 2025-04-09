@@ -58,19 +58,4 @@ public class ProcessamentoJpa implements Serializable {
 
   @Column(name = "timestamp_conclusao")
   private LocalDateTime timestampConclusao;
-
-  @Override
-  public String toString() {
-    return "ProcessamentoJpa { "
-        + "id=" + id
-        + ", nomeVideo=" + nomeVideo
-        + ", usuario=" + (usuario != null ? usuario.toString() : "null")
-        + ", jobId=" + jobId
-        + ", status=" + status
-        + ", mensagemErro=" + mensagemErro
-        + ", linkDownload=" + linkDownload
-        + ", timestampInicio=" + timestampInicio
-        + ", timestampConclusao=" + timestampConclusao
-        + " }";
-  }
 }
