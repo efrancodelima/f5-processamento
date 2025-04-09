@@ -33,13 +33,11 @@ public class CriarJobService {
   private static final int INTERVALO_CAPTURA = 15;
 
   private final AwsConfig awsConfig;
-  private final MediaConvertClient mediaConvertClient;
-
+  
   // Construtor
   @Autowired
-  public CriarJobService(AwsConfig awsConfig, MediaConvertClient mediaConvertClient) {
+  public CriarJobService(AwsConfig awsConfig) {
     this.awsConfig = awsConfig;
-    this.mediaConvertClient = mediaConvertClient;
   }
   
   // Método público
@@ -48,6 +46,8 @@ public class CriarJobService {
 
     caminhoVideo = getCaminhoVideo(caminhoVideo);
     diretorioImagens = getDiretorioImagens(diretorioImagens);
+
+    MediaConvertClient mediaConvertClient = awsConfig.buildMediaConvertClient();
 
     try {
       CreateJobRequest createJobRequest = CreateJobRequest.builder()

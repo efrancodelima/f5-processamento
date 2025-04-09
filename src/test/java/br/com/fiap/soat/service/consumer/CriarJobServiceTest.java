@@ -34,6 +34,7 @@ class CriarJobServiceTest {
   @BeforeEach
   void setup() {
     closeable = MockitoAnnotations.openMocks(this);
+    doReturn(mediaConvertClient).when(awsConfig).buildMediaConvertClient();
   }
 
   @AfterEach

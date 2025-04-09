@@ -1,11 +1,11 @@
 package br.com.fiap.soat.config;
 
 import java.net.URI;
-import lombok.Data;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+
+import lombok.Data;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
@@ -26,27 +26,21 @@ public class AwsConfig {
   private String mediaConvertRoleArn;
   private String mediaConvertEndpoint;
   
-  @Bean
-  @Scope("prototype")
-  public S3Client s3Client() {
+  public S3Client buildS3Client() {
     return S3Client.builder()
         .region(obtainRegion())
         .credentialsProvider(StaticCredentialsProvider.create(createCredentials()))
         .build();
   }
   
-  @Bean
-  @Scope("prototype")
-  public S3Presigner s3Presigner() {
+  public S3Presigner buildS3Presigner() {
     return S3Presigner.builder()
         .region(obtainRegion())
         .credentialsProvider(StaticCredentialsProvider.create(createCredentials()))
         .build();
   }
 
-  @Bean
-  @Scope("prototype")
-  public MediaConvertClient mediaConvertClient() {
+  public MediaConvertClient buildMediaConvertClient() {
     return MediaConvertClient.builder()
         .endpointOverride(URI.create(mediaConvertEndpoint))
         .region(obtainRegion())

@@ -38,7 +38,7 @@ class FinalizarComSucessoServiceTest {
   ProcessamentoService procService;
 
   @Mock
-  S3Presigner s3presigner;
+  S3Presigner s3Presigner;
 
   @Mock
   PresignedGetObjectRequest presignedRequest;
@@ -49,6 +49,7 @@ class FinalizarComSucessoServiceTest {
   @BeforeEach
   void setup() {
     closeable = MockitoAnnotations.openMocks(this);
+    doReturn(s3Presigner).when(awsConfig).buildS3Presigner();
   }
 
   @AfterEach
@@ -69,7 +70,7 @@ class FinalizarComSucessoServiceTest {
 
     doReturn("bucket-name").when(awsConfig).getBucketName();
 
-    doReturn(presignedRequest).when(s3presigner)
+    doReturn(presignedRequest).when(s3Presigner)
         .presignGetObject(Mockito.any(GetObjectPresignRequest.class));
 
     String url = "https://example.com";
@@ -118,7 +119,7 @@ class FinalizarComSucessoServiceTest {
 
     doReturn("bucket-name").when(awsConfig).getBucketName();
 
-    doThrow(new RuntimeException()).when(s3presigner)
+    doThrow(new RuntimeException()).when(s3Presigner)
         .presignGetObject(Mockito.any(GetObjectPresignRequest.class));
 
     // Act

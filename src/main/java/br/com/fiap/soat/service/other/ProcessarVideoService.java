@@ -34,17 +34,15 @@ public class ProcessarVideoService {
   private final ProcessamentoService processamentoService;
   private final CriarJobService criarJobService;
   private final AwsConfig awsConfig;
-  private final S3Client s3Client;
   
   // Construtor
   @Autowired
   public ProcessarVideoService(ProcessamentoService processamentoService,
-      CriarJobService criarJobService, AwsConfig awsConfig, S3Client s3Client) {
+      CriarJobService criarJobService, AwsConfig awsConfig) {
 
     this.processamentoService = processamentoService;
     this.criarJobService = criarJobService;
     this.awsConfig = awsConfig;
-    this.s3Client = s3Client;
   }
 
   // Método público
@@ -105,6 +103,7 @@ public class ProcessarVideoService {
           .key(caminhoVideoS3)
           .build();
 
+      S3Client s3Client = awsConfig.buildS3Client();
       s3Client.putObject(putRequest, RequestBody.fromFile(localPath));
     
     } catch (RuntimeException e) {
