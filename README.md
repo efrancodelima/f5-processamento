@@ -65,7 +65,7 @@ O front end não é necessário para a entrega do Tech Challenge, mas nós criam
 
 ### 2.3 Autenticação
 
-"O Sistema deve ser protegido por usuário e senha."
+"O sistema deve ser protegido por usuário e senha."
 
 FORMA DE AUTENTICAÇÃO
 
