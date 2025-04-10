@@ -12,7 +12,7 @@ Link do projeto no GitHub:
 
 Link do vídeo com a apresentação do projeto:
 
-- PENDENTE
+- [PENDENTE](https://youtu.be/BUuxB7dORD4)
 
 # Índice
 
@@ -169,10 +169,10 @@ Abaixo segue a evidência dos testes:
 A pipeline segue o padrão dos projetos anteriores: ela valida a qualidade do código (conforme descrito no item anterior) e, se a qualidade estiver ok, faz o build da imagem docker, faz o push no ECR e o deploy no ECS. Se der qualquer erro, a pipeline é interrompida.
 
 Links para o job completo da pipeline:
-- Microsserviço de vídeo: https://github.com/efrancodelima/f5-processamento/actions/runs/14322269037/job/40141338166
-- Microsserviço de notificação: https://github.com/efrancodelima/f5-notificacao/actions/runs/14320065155/job/40135129961
-- Lambda de sucesso: https://github.com/efrancodelima/f5-lambda-sucesso/actions/runs/14020601602/job/39252034654
-- Lambda de falha:  https://github.com/efrancodelima/f5-lambda-falha/actions/runs/14020589569/job/39252008176
+- Microsserviço de vídeo: https://github.com/efrancodelima/f5-processamento/actions/runs/14368948277/job/40288117474
+- Microsserviço de notificação: https://github.com/efrancodelima/f5-notificacao/actions/runs/14359570031/job/40257248393
+- Lambda de sucesso: https://github.com/efrancodelima/f5-lambda-sucesso/actions/runs/14365973924/job/40278867445
+- Lambda de falha: https://github.com/efrancodelima/f5-lambda-falha/actions/runs/14365971008/job/40278857352
 
 ## 3 Banco de dados
 
