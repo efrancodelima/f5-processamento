@@ -12,7 +12,7 @@ Link do projeto no GitHub:
 
 Link do vídeo com a apresentação do projeto:
 
-- [PENDENTE](https://youtu.be/BUuxB7dORD4)
+- [https://youtu.be/BUuxB7dORD4](https://youtu.be/BUuxB7dORD4)
 
 # Índice
 
